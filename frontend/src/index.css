@@ -1,4 +1,55 @@
- body {
+@import "tailwindcss";
+
+:root {
+  /* Dark Purple Primary */
+  --color-primary: 88 28 135; /* #581c87 - purple-900 */
+  --color-primary-foreground: 250 250 250; /* #fafafa - neutral-50 */
+  
+  /* Orange Secondary */
+  --color-secondary: 251 146 60; /* #fb923c - orange-400 */
+  --color-secondary-foreground: 26 46 5; /* #1a2e05 - green-950 for contrast */
+  
+  /* Very Light Purple Accent */
+  --color-accent: 250 245 255; /* #faf5ff - purple-50 */
+  --color-accent-foreground: 88 28 135; /* #581c87 - purple-900 */
+  
+  /* Background colors */
+  --color-background: 255 255 255; /* #ffffff - white */
+  --color-foreground: 23 23 23; /* #171717 - neutral-900 */
+  
+  /* Muted colors */
+  --color-muted: 245 245 245; /* #f5f5f5 - neutral-100 */
+  --color-muted-foreground: 115 115 115; /* #737373 - neutral-500 */
+  
+  /* Border and input */
+  --color-border: 229 229 229; /* #e5e5e5 - neutral-200 */
+  --color-input: 229 229 229; /* #e5e5e5 - neutral-200 */
+  --color-ring: 88 28 135; /* #581c87 - purple-900 */
+  
+  /* Destructive */
+  --color-destructive: 239 68 68; /* #ef4444 - red-500 */
+  --color-destructive-foreground: 250 250 250; /* #fafafa - neutral-50 */
+}
+
+.dark {
+  /* Dark mode colors */
+  --color-background: 23 23 23; /* #171717 - neutral-900 */
+  --color-foreground: 250 250 250; /* #fafafa - neutral-50 */
+  
+  --color-muted: 38 38 38; /* #262626 - neutral-800 */
+  --color-muted-foreground: 163 163 163; /* #a3a3a3 - neutral-400 */
+  
+  --color-accent: 59 7 100; /* #3b0764 - purple-950 */
+  --color-accent-foreground: 250 245 255; /* #faf5ff - purple-50 */
+  
+  --color-border: 38 38 38; /* #262626 - neutral-800 */
+  --color-input: 38 38 38; /* #262626 - neutral-800 */
+}
+
+body {
   margin: 0;
   padding: 0;
- }
+  background-color: rgb(var(--color-background));
+  color: rgb(var(--color-foreground));
+  font-family: system-ui, -apple-system, sans-serif;
+}
