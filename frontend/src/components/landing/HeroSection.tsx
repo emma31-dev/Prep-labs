@@ -140,16 +140,17 @@ const HeroSection = () => {
                   color: '#a5b4fc',
                 }}
               >
-                app.preplabs.ai/elite-dashboard
+                preplabs.emmafidel.xyz
               </div>
             </div>
             
-            {/* Placeholder for dashboard image */}
-            <div 
-              className="rounded-lg h-64 md:h-96 flex items-center justify-center"
-              style={{ backgroundColor: 'rgba(199, 210, 254, 0.3)' }}
-            >
-              <span style={{ color: '#6366F1' }} className="font-medium">Dashboard Preview</span>
+            {/* Dashboard Screenshot */}
+            <div className="rounded-lg overflow-hidden">
+              <img 
+                src="/dashboardscreenshot.png" 
+                alt="Prep Labs Dashboard" 
+                className="w-full h-auto object-cover"
+              />
             </div>
           </div>
 

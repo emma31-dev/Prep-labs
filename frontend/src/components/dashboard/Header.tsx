@@ -1,7 +1,7 @@
 interface HeaderProps {
   userName?: string;
-  userRole?: string;
   userAvatar?: string;
+  onMenuClick?: () => void;
 }
 
 const SearchIcon = () => (
@@ -18,25 +18,30 @@ const BellIcon = () => (
   </svg>
 );
 
-const MessageIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-  </svg>
-);
-
-const ChevronDownIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="6,9 12,15 18,9"/>
+const MenuIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="3" y1="12" x2="21" y2="12"/>
+    <line x1="3" y1="6" x2="21" y2="6"/>
+    <line x1="3" y1="18" x2="21" y2="18"/>
   </svg>
 );
 
 const Header = ({ 
-  userName = "Priscilla Lily", 
-  userRole = "Admin",
-  userAvatar = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=40&h=40&fit=crop&crop=face"
+  userName = "Priscilla Lily",
+  userAvatar = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=40&h=40&fit=crop&crop=face",
+  onMenuClick
 }: HeaderProps) => {
   return (
-    <header className="h-16 flex items-center justify-between px-6 border-b" style={{ backgroundColor: '#ffffff', borderColor: '#e5e5e5' }}>
+    <header className="h-16 flex items-center justify-between px-4 md:px-6 border-b" style={{ backgroundColor: '#ffffff', borderColor: '#e5e5e5' }}>
+      {/* Mobile Menu Button */}
+      <button 
+        onClick={onMenuClick}
+        className="lg:hidden p-2 rounded-lg transition-colors hover:bg-gray-100 mr-2"
+        style={{ color: '#737373' }}
+      >
+        <MenuIcon />
+      </button>
+
       {/* Search Bar */}
       <div className="flex-1 max-w-md">
         <div className="relative">
@@ -56,35 +61,29 @@ const Header = ({
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center gap-4">
-        {/* Notification Icons */}
+      <div className="flex items-center gap-2 md:gap-4">
+        {/* Notification Icon */}
         <button 
-          className="p-2 rounded-lg transition-colors hover:bg-gray-100"
+          className="p-2 rounded-lg transition-colors hover:bg-gray-100 relative"
           style={{ color: '#737373' }}
+          title="Notifications"
         >
           <BellIcon />
-        </button>
-        <button 
-          className="p-2 rounded-lg transition-colors hover:bg-gray-100"
-          style={{ color: '#737373' }}
-        >
-          <MessageIcon />
+          {/* Optional notification dot */}
+          <span 
+            className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
+            style={{ backgroundColor: '#ef4444' }}
+          />
         </button>
 
-        {/* User Profile */}
-        <div className="flex items-center gap-3 pl-4 border-l" style={{ borderColor: '#e5e5e5' }}>
+        {/* User Profile - Simplified */}
+        <div className="flex items-center gap-2 md:gap-3 pl-2 md:pl-4 border-l" style={{ borderColor: '#e5e5e5' }}>
           <img
             src={userAvatar}
             alt={userName}
-            className="w-10 h-10 rounded-full object-cover"
+            className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover"
           />
-          <div className="flex flex-col">
-            <span className="text-sm font-medium" style={{ color: '#171717' }}>{userName}</span>
-            <span className="text-xs" style={{ color: '#737373' }}>{userRole}</span>
-          </div>
-          <button style={{ color: '#737373' }}>
-            <ChevronDownIcon />
-          </button>
+          <span className="hidden md:block text-sm font-medium" style={{ color: '#171717' }}>{userName}</span>
         </div>
       </div>
     </header>

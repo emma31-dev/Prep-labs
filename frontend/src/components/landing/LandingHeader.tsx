@@ -1,11 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 
-interface LandingHeaderProps {
-  onLogin?: () => void;
-  onGetStarted?: () => void;
-}
-
-const LandingHeader = ({ onLogin }: LandingHeaderProps) => {
+const LandingHeader = () => {
   const location = useLocation();
 
   const scrollToSection = (sectionId: string) => {
@@ -71,15 +66,15 @@ const LandingHeader = ({ onLogin }: LandingHeaderProps) => {
 
         {/* Auth Buttons */}
         <div className="flex items-center gap-4">
-          <button 
-            onClick={onLogin}
-            className="hidden sm:block text-sm font-semibold transition-colors hover:text-indigo-600 bg-transparent border-none cursor-pointer"
+          <Link
+            to="/auth/login"
+            className="hidden sm:block text-sm font-semibold transition-colors hover:text-indigo-600 no-underline"
             style={{ color: 'rgba(49, 46, 129, 0.6)' }}
           >
             Log in
-          </button>
+          </Link>
           <Link 
-            to="/auth?mode=signup"
+            to="/auth/signup"
             className="px-6 py-2.5 rounded-full text-sm font-bold text-white transition-all no-underline"
             style={{ 
               backgroundColor: '#F97316',

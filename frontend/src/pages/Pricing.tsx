@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { LandingHeader, LandingFooter, BackgroundBlobs } from "../components/landing";
 
 const CheckIcon = () => (
@@ -69,14 +68,13 @@ const pricingTiers: PricingTier[] = [
 ];
 
 const Pricing = () => {
-  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen relative overflow-x-hidden" style={{ backgroundColor: '#F8FAFC' }}>
       <BackgroundBlobs />
       
       <div className="relative z-10">
-        <LandingHeader onLogin={() => navigate("/auth")} onGetStarted={() => navigate("/auth")} />
+        <LandingHeader />
         
         {/* Pricing Header */}
         <section className="pt-32 pb-16 lg:pt-40 lg:pb-20">

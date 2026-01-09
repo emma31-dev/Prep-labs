@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { 
   LandingHeader, 
   HeroSection, 
@@ -12,7 +12,6 @@ import {
 } from "../components/landing";
 
 const Landing = () => {
-  const navigate = useNavigate();
   const location = useLocation();
 
   // Handle hash navigation on page load
@@ -28,10 +27,6 @@ const Landing = () => {
     }
   }, [location.hash]);
 
-  const handleLogin = () => {
-    navigate("/auth");
-  };
-
   return (
     <div className="min-h-screen relative overflow-x-hidden scroll-smooth" style={{ backgroundColor: '#F8FAFC' }}>
       {/* Background Blobs */}
@@ -39,7 +34,7 @@ const Landing = () => {
       
       {/* Content */}
       <div className="relative z-10">
-        <LandingHeader onLogin={handleLogin} />
+        <LandingHeader />
         <HeroSection />
         <LogoStrip />
         <section id="features">
