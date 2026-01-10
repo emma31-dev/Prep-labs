@@ -48,3 +48,6 @@ dist-ssr
 
 # Vercel
 .vercel
+
+# Kiro
+.kiro/
