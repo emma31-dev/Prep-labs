@@ -9,7 +9,6 @@ const ProfileContent = () => {
   };
 
   const basicDetails = [
-    { label: "Gender", value: "Female" },
     { label: "Age", value: "23 years" },
     { label: "Subscription", value: "Pro", badge: true },
     { label: "Joined", value: "March 15, 2024" },
