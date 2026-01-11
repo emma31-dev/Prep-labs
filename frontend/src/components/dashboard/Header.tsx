@@ -1,3 +1,6 @@
+import { useState, useEffect, useRef } from "react";
+import { useAuth } from "../../hooks/useAuth";
+
 interface HeaderProps {
   userName?: string;
   userAvatar?: string;
@@ -27,10 +30,49 @@ const MenuIcon = () => (
 );
 
 const Header = ({ 
-  userName = "Priscilla Lily",
-  userAvatar = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=40&h=40&fit=crop&crop=face",
+  userName,
+  userAvatar,
   onMenuClick
 }: HeaderProps) => {
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const { user, logout } = useAuth();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Use auth user data if available, fallback to props
+  const displayName = user?.fullName || userName || "User";
+  const displayAvatar = user?.avatarUrl || userAvatar;
+  
+  // Get initials for avatar fallback
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const handleSignOut = () => {
+    setShowUserMenu(false);
+    logout();
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserMenu]);
   return (
     <header className="h-16 flex items-center justify-between px-4 md:px-6 border-b" style={{ backgroundColor: '#ffffff', borderColor: '#e5e5e5' }}>
       {/* Mobile Menu Button */}
@@ -76,14 +118,50 @@ const Header = ({
           />
         </button>
 
-        {/* User Profile - Simplified */}
-        <div className="flex items-center gap-2 md:gap-3 pl-2 md:pl-4 border-l" style={{ borderColor: '#e5e5e5' }}>
-          <img
-            src={userAvatar}
-            alt={userName}
-            className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover"
-          />
-          <span className="hidden md:block text-sm font-medium" style={{ color: '#171717' }}>{userName}</span>
+        {/* User Profile - With Dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <button
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className="flex items-center gap-2 pl-2 md:pl-4 border-l hover:bg-gray-50 rounded-lg p-2 transition-colors"
+            style={{ borderColor: '#e5e5e5' }}
+          >
+            {displayAvatar ? (
+              <img
+                src={displayAvatar}
+                alt={displayName}
+                className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover"
+              />
+            ) : (
+              <div 
+                className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm"
+                style={{ backgroundColor: '#581c87' }}
+              >
+                {getInitials(displayName)}
+              </div>
+            )}
+          </button>
+
+          {/* User Dropdown Menu */}
+          {showUserMenu && (
+            <div 
+              className="absolute right-0 top-full mt-2 w-48 bg-white border rounded-lg shadow-lg z-50"
+              style={{ borderColor: '#e5e5e5' }}
+            >
+              <div className="p-3 border-b" style={{ borderColor: '#e5e5e5' }}>
+                <p className="text-sm font-medium" style={{ color: '#171717' }}>{displayName}</p>
+                <p className="text-xs" style={{ color: '#737373' }}>{user?.email}</p>
+              </div>
+              <div className="py-1">
+                <button
+                  onClick={handleSignOut}
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                  style={{ color: '#ef4444' }}
+                >
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>

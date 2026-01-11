@@ -6,6 +6,7 @@ import CreateQuizContent from "../components/dashboard/CreateQuizContent";
 import PreferencesContent from "../components/dashboard/PreferencesContent";
 import ThemeContent from "../components/dashboard/ThemeContent";
 import HistoryContent from "../components/dashboard/HistoryContent";
+import ResourcesContent from "../components/dashboard/ResourcesContent";
 
 const Dashboard = () => {
   const [activeView, setActiveView] = useState("Home");
@@ -29,24 +30,11 @@ const Dashboard = () => {
           </div>
         );
       case "Resources":
-        return (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <h1 className="text-3xl font-bold" style={{ color: '#171717' }}>Resources</h1>
-            <p style={{ color: '#737373' }}>Your learning resources will appear here.</p>
-          </div>
-        );
+        return <ResourcesContent />;
       case "Preference":
         return <PreferencesContent />;
       case "Theme":
         return <ThemeContent />;
-      case "Logout":
-        // Handle logout logic here
-        return (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <h1 className="text-3xl font-bold" style={{ color: '#171717' }}>Logout</h1>
-            <p style={{ color: '#737373' }}>Logging out...</p>
-          </div>
-        );
       default:
         return <HomeContent />;
     }
@@ -66,7 +54,6 @@ const Dashboard = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <Header 
-          userName="Priscilla Lily" 
           onMenuClick={() => setSidebarOpen(true)}
         />
 

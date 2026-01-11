@@ -64,102 +64,165 @@
     - Configure CORS for frontend origin
     - _Requirements: 1.1, 6.1, 7.1_
 
-- [ ] 2. Set up frontend authentication infrastructure
-  - [ ] 2.1 Install Supabase client package
+- [x] 2. Set up frontend authentication infrastructure
+
+
+
+
+
+  - [x] 2.1 Install Supabase client package
+
+
     - Add `@supabase/supabase-js` to frontend dependencies
     - _Requirements: 3.2, 8.2_
-  - [ ] 2.2 Create Supabase client utility
+  - [x] 2.2 Create Supabase client utility
+
+
     - Create `frontend/src/lib/supabase.ts`
     - Initialize client with environment variables
     - Add `uploadProfilePhoto` helper function for avatar uploads
     - _Requirements: 3.2, 3.3_
-  - [ ] 2.3 Create Jotai auth atoms
+  - [x] 2.3 Create Jotai auth atoms
+
+
     - Create `frontend/src/store/authAtoms.ts`
     - Define `authAtom` with user, tokens, and auth status
     - Use `atomWithStorage` for persistence
     - Create derived atoms for user and isAuthenticated
     - _Requirements: 8.1, 8.2, 8.3, 8.4_
-  - [ ] 2.4 Create auth service
+  - [x] 2.4 Create auth service
+
+
     - Create `frontend/src/services/authService.ts`
     - Implement signup, login, signout, updateProfile, getSession methods
     - Configure API base URL from environment
     - _Requirements: 1.1, 6.1, 7.1, 5.1_
-  - [ ] 2.5 Add environment variables
+  - [x] 2.5 Add environment variables
+
+
     - Create/update `.env` file with VITE_API_URL, VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
     - _Requirements: 2.1, 3.2_
 
-- [ ] 3. Implement multi-step signup flow
-  - [ ] 3.1 Create SignupFlow container component
+- [x] 3. Implement multi-step signup flow
+
+
+
+
+
+  - [x] 3.1 Create SignupFlow container component
+
+
     - Create `frontend/src/components/signup/SignupFlow.tsx`
     - Manage step state (form, verification, profile, plan)
     - Handle step navigation and data persistence between steps
     - _Requirements: 2.1, 3.6, 4.2_
-  - [ ] 3.2 Create FormStep component
+  - [x] 3.2 Create FormStep component
+
+
     - Create `frontend/src/components/signup/FormStep.tsx`
     - Implement email, password, fullName inputs with validation
     - Call signup API on form submit
     - Advance to verification step on success
     - _Requirements: 1.1, 1.2, 1.3, 1.5_
-  - [ ] 3.3 Create VerificationStep component
+  - [x] 3.3 Create VerificationStep component
+
+
     - Create `frontend/src/components/signup/VerificationStep.tsx`
     - Display email verification pending message
     - Add resend verification button
     - Poll or listen for verification completion
     - _Requirements: 2.1, 2.2, 2.3, 2.4_
-  - [ ] 3.4 Create ProfileStep component
+  - [x] 3.4 Create ProfileStep component
+
+
     - Create `frontend/src/components/signup/ProfileStep.tsx`
     - Implement age input with validation (13-120)
     - Implement photo upload with file type/size validation
     - Upload photo to Supabase bucket and get URL
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
-  - [ ] 3.5 Create PlanStep component
+  - [x] 3.5 Create PlanStep component
+
+
     - Create `frontend/src/components/signup/PlanStep.tsx`
     - Display Free, Pro, Premium plan cards with features
     - Handle plan selection
     - Call profile update API with selected plan
     - Update auth atom and redirect to dashboard
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 5.2, 5.3_
-  - [ ] 3.6 Create signup components index
+  - [x] 3.6 Create signup components index
+
+
     - Create `frontend/src/components/signup/index.ts` for exports
     - _Requirements: 3.1_
 
-- [ ] 4. Update existing auth pages
-  - [ ] 4.1 Update Signup page
+- [x] 4. Update existing auth pages
+
+
+
+
+
+  - [x] 4.1 Update Signup page
+
+
     - Replace SignupModal with SignupFlow in `frontend/src/pages/Signup.tsx`
     - Handle email verification callback URL
     - _Requirements: 2.1, 5.3_
-  - [ ] 4.2 Update LoginModal component
+  - [x] 4.2 Update LoginModal component
+
+
     - Update `frontend/src/components/LoginModal.tsx` to use auth service
     - Update auth atom on successful login
     - Redirect to dashboard on success
     - Display appropriate error messages
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
-  - [ ] 4.3 Update Login page
+  - [x] 4.3 Update Login page
+
+
     - Update `frontend/src/pages/Login.tsx` if needed
     - _Requirements: 6.3_
 
-- [ ] 5. Implement session management and protected routes
-  - [ ] 5.1 Create auth hook
+- [x] 5. Implement session management and protected routes
+
+
+
+
+
+  - [x] 5.1 Create auth hook
+
+
     - Create `frontend/src/hooks/useAuth.ts`
     - Provide login, logout, updateProfile functions
     - Handle session restoration on app load
     - _Requirements: 8.1, 8.2, 8.3, 8.4_
-  - [ ] 5.2 Add signout functionality to dashboard
+  - [x] 5.2 Add signout functionality to dashboard
+
+
     - Update dashboard header/sidebar with signout button
     - Clear auth atom and redirect on signout
     - _Requirements: 7.1, 7.2, 7.3_
-  - [ ] 5.3 Update App.tsx with auth provider
+  - [x] 5.3 Update App.tsx with auth provider
+
+
     - Wrap app with Jotai Provider if needed
     - Add session restoration logic on mount
     - _Requirements: 8.2_
 
-- [ ] 6. Add email verification callback route
-  - [ ] 6.1 Create verification callback page
+- [x] 6. Add email verification callback route
+
+
+
+
+
+  - [x] 6.1 Create verification callback page
+
+
     - Create `frontend/src/pages/VerifyEmail.tsx`
     - Handle Supabase email verification callback
     - Redirect to signup flow profile step on success
     - _Requirements: 2.1, 2.4_
-  - [ ] 6.2 Add route to App.tsx
+  - [x] 6.2 Add route to App.tsx
+
+
     - Add `/auth/verify` route for email verification callback
     - _Requirements: 2.1_
 

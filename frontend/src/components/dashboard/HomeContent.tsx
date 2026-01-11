@@ -1,4 +1,12 @@
+import { useAtom } from "jotai";
+import { userAtom } from "../../store/authAtoms";
+
 const HomeContent = () => {
+  const [user] = useAtom(userAtom);
+  
+  // Get first name for greeting
+  const firstName = user?.fullName?.split(' ')[0] || 'User';
+  
   // Mock data
   const recentActivity = [
     {
@@ -144,7 +152,7 @@ const HomeContent = () => {
           >
             AI TEST READY
           </span>
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Welcome back, Priscilla!</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Welcome back, {firstName}!</h2>
           <p className="text-purple-100 mb-6">
             Your personalized study plan is ready. You've completed 12 mock tests this week. Keep it up!
           </p>

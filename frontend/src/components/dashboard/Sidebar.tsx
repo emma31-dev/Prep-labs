@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "../../hooks/useAuth";
 
 interface NavItem {
   icon: React.ReactNode;
@@ -76,6 +77,7 @@ const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
 
 const Sidebar = ({ activeItem = "Home", onItemClick, isOpen = false, onClose }: SidebarProps) => {
   const [settingsExpanded, setSettingsExpanded] = useState(false);
+  const { logout } = useAuth();
 
   const navItems: NavItem[] = [
     { icon: <HomeIcon />, label: "Home", id: "Home" },
@@ -93,6 +95,12 @@ const Sidebar = ({ activeItem = "Home", onItemClick, isOpen = false, onClose }: 
   ];
 
   const handleItemClick = (itemId: string) => {
+    // Handle logout separately
+    if (itemId === "Logout") {
+      logout();
+      return;
+    }
+    
     if (onItemClick) {
       onItemClick(itemId);
     }

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useAtom } from "jotai";
+import { userAtom } from "../../store/authAtoms";
 import ProgressChart from "./ProgressChart";
 
 interface Tab {
@@ -14,149 +16,214 @@ const tabs: Tab[] = [
 
 // Subscription History Component
 const SubscriptionHistory = () => {
-  const subscriptions = [
+  const [user] = useAtom(userAtom);
+  
+  const getPlanDetails = (planType: string | undefined) => {
+    switch (planType?.toLowerCase()) {
+      case 'premium':
+        return { name: 'Premium', price: '$19.99', cycle: 'Monthly', color: '#ea580c' };
+      case 'pro':
+        return { name: 'Pro', price: '$9.99', cycle: 'Monthly', color: '#7c3aed' };
+      default:
+        return { name: 'Free', price: '$0.00', cycle: 'Forever', color: '#6b7280' };
+    }
+  };
+
+  const currentPlan = getPlanDetails(user?.planType);
+  const isFreePlan = user?.planType === 'free' || !user?.planType;
+
+  // Mock subscription history - in real app, fetch from backend
+  const subscriptions = isFreePlan ? [] : [
     {
       id: 1,
-      plan: "Pro",
+      plan: currentPlan.name,
       status: "active",
-      startDate: "Jan 1, 2026",
-      endDate: "Jan 1, 2027",
-      price: "$99.00",
-      billingCycle: "Yearly",
-    },
-    {
-      id: 2,
-      plan: "Pro",
-      status: "expired",
-      startDate: "Jan 1, 2025",
-      endDate: "Jan 1, 2026",
-      price: "$99.00",
-      billingCycle: "Yearly",
-    },
-    {
-      id: 3,
-      plan: "Basic",
-      status: "expired",
-      startDate: "Jul 1, 2024",
-      endDate: "Jan 1, 2025",
-      price: "$29.00",
-      billingCycle: "6 Months",
-    },
-    {
-      id: 4,
-      plan: "Free Trial",
-      status: "expired",
-      startDate: "Jun 1, 2024",
-      endDate: "Jul 1, 2024",
-      price: "$0.00",
-      billingCycle: "1 Month",
+      startDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      price: currentPlan.price,
+      billingCycle: currentPlan.cycle,
     },
   ];
 
   return (
     <div className="space-y-4">
       {/* Current Plan Summary */}
-      <div className="p-4 rounded-xl border-2" style={{ borderColor: '#581c87', backgroundColor: '#faf5ff' }}>
+      <div 
+        className="p-4 rounded-xl border-2" 
+        style={{ 
+          borderColor: isFreePlan ? '#e5e5e5' : '#581c87', 
+          backgroundColor: isFreePlan ? '#f9fafb' : '#faf5ff' 
+        }}
+      >
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold" style={{ color: '#171717' }}>Current Plan: Pro</h3>
-              <span className="px-2 py-0.5 text-xs font-medium rounded-full" style={{ backgroundColor: '#16a34a', color: '#ffffff' }}>
-                Active
+              <h3 className="text-lg font-semibold" style={{ color: '#171717' }}>
+                Current Plan: {currentPlan.name}
+              </h3>
+              <span 
+                className="px-2 py-0.5 text-xs font-medium rounded-full text-white"
+                style={{ backgroundColor: currentPlan.color }}
+              >
+                {isFreePlan ? 'Free' : 'Active'}
               </span>
             </div>
             <p className="text-sm mt-1" style={{ color: '#737373' }}>
-              Renews on Jan 1, 2027
+              {isFreePlan 
+                ? 'Upgrade to unlock more features' 
+                : `Renews on ${subscriptions[0]?.endDate}`
+              }
             </p>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-bold" style={{ color: '#581c87' }}>$99.00</div>
-            <div className="text-sm" style={{ color: '#737373' }}>per year</div>
+            <div className="text-2xl font-bold" style={{ color: currentPlan.color }}>
+              {currentPlan.price}
+            </div>
+            <div className="text-sm" style={{ color: '#737373' }}>
+              {isFreePlan ? 'forever' : 'per month'}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Subscription History List */}
-      <div className="space-y-3">
-        <h4 className="font-medium" style={{ color: '#171717' }}>Payment History</h4>
-        {subscriptions.map((sub) => (
-          <div
-            key={sub.id}
-            className="p-4 rounded-xl border flex items-center justify-between"
-            style={{ borderColor: '#e5e5e5' }}
+        {isFreePlan && (
+          <button
+            className="mt-4 w-full py-2 px-4 rounded-lg text-sm font-medium text-white transition-colors"
+            style={{ backgroundColor: '#581c87' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6b21a8'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#581c87'}
           >
-            <div className="flex items-center gap-4">
-              {/* Plan Icon */}
-              <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                style={{
-                  backgroundColor: sub.status === 'active' ? '#faf5ff' : '#f5f5f5',
-                }}
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke={sub.status === 'active' ? '#581c87' : '#737373'}
-                  strokeWidth="2"
-                >
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-              </div>
-
-              {/* Plan Details */}
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-medium" style={{ color: '#171717' }}>{sub.plan}</span>
-                  <span
-                    className="px-2 py-0.5 text-xs font-medium rounded-full"
-                    style={{
-                      backgroundColor: sub.status === 'active' ? '#dcfce7' : '#f5f5f5',
-                      color: sub.status === 'active' ? '#16a34a' : '#737373',
-                    }}
-                  >
-                    {sub.status === 'active' ? 'Active' : 'Expired'}
-                  </span>
-                </div>
-                <div className="text-sm" style={{ color: '#737373' }}>
-                  {sub.startDate} — {sub.endDate} · {sub.billingCycle}
-                </div>
-              </div>
-            </div>
-
-            {/* Price */}
-            <div className="text-right">
-              <div className="font-semibold" style={{ color: '#171717' }}>{sub.price}</div>
-              <div className="text-xs" style={{ color: '#737373' }}>
-                {sub.status === 'active' ? 'Paid' : 'Completed'}
-              </div>
-            </div>
-          </div>
-        ))}
+            Upgrade to Pro
+          </button>
+        )}
       </div>
+
+      {/* Plan Features */}
+      <div className="p-4 rounded-xl border" style={{ borderColor: '#e5e5e5' }}>
+        <h4 className="font-medium mb-3" style={{ color: '#171717' }}>
+          {currentPlan.name} Plan Features
+        </h4>
+        <ul className="space-y-2">
+          {isFreePlan ? (
+            <>
+              <FeatureItem text="Basic quiz access" included />
+              <FeatureItem text="Progress tracking" included />
+              <FeatureItem text="Community support" included />
+              <FeatureItem text="Unlimited quiz attempts" included={false} />
+              <FeatureItem text="Advanced analytics" included={false} />
+              <FeatureItem text="AI-powered recommendations" included={false} />
+            </>
+          ) : user?.planType === 'pro' ? (
+            <>
+              <FeatureItem text="Everything in Free" included />
+              <FeatureItem text="Unlimited quiz attempts" included />
+              <FeatureItem text="Advanced analytics" included />
+              <FeatureItem text="Priority support" included />
+              <FeatureItem text="Custom study plans" included />
+              <FeatureItem text="AI-powered recommendations" included={false} />
+            </>
+          ) : (
+            <>
+              <FeatureItem text="Everything in Pro" included />
+              <FeatureItem text="AI-powered recommendations" included />
+              <FeatureItem text="Personal coaching" included />
+              <FeatureItem text="1-on-1 tutoring sessions" included />
+              <FeatureItem text="Advanced reporting" included />
+              <FeatureItem text="Team collaboration" included />
+            </>
+          )}
+        </ul>
+      </div>
+
+      {/* Payment History */}
+      {subscriptions.length > 0 && (
+        <div className="space-y-3">
+          <h4 className="font-medium" style={{ color: '#171717' }}>Payment History</h4>
+          {subscriptions.map((sub) => (
+            <div
+              key={sub.id}
+              className="p-4 rounded-xl border flex items-center justify-between"
+              style={{ borderColor: '#e5e5e5' }}
+            >
+              <div className="flex items-center gap-4">
+                <div
+                  className="w-10 h-10 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: '#faf5ff' }}
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#581c87"
+                    strokeWidth="2"
+                  >
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium" style={{ color: '#171717' }}>{sub.plan}</span>
+                    <span
+                      className="px-2 py-0.5 text-xs font-medium rounded-full"
+                      style={{ backgroundColor: '#dcfce7', color: '#16a34a' }}
+                    >
+                      Active
+                    </span>
+                  </div>
+                  <div className="text-sm" style={{ color: '#737373' }}>
+                    {sub.startDate} — {sub.endDate} · {sub.billingCycle}
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="font-semibold" style={{ color: '#171717' }}>{sub.price}</div>
+                <div className="text-xs" style={{ color: '#737373' }}>Paid</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {isFreePlan && (
+        <div className="text-center py-4">
+          <p className="text-sm" style={{ color: '#737373' }}>
+            No payment history yet. Upgrade to a paid plan to see your billing history.
+          </p>
+        </div>
+      )}
     </div>
   );
 };
 
+// Feature item component
+const FeatureItem = ({ text, included }: { text: string; included: boolean }) => (
+  <li className="flex items-center gap-2 text-sm">
+    {included ? (
+      <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#16a34a' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+      </svg>
+    ) : (
+      <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#d1d5db' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    )}
+    <span style={{ color: included ? '#171717' : '#9ca3af' }}>{text}</span>
+  </li>
+);
+
 // Streak Calendar Component
-const StreakCalendar = () => {
+interface StreakCalendarProps {
+  testCompletedDays?: Date[];
+}
+
+const StreakCalendar = ({ testCompletedDays = [] }: StreakCalendarProps) => {
+  const [user] = useAtom(userAtom);
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Mock data for test completion days (dates when user completed tests)
-  const testCompletedDays = [
-    new Date(2026, 0, 2),
-    new Date(2026, 0, 3),
-    new Date(2026, 0, 4),
-    new Date(2026, 0, 5),
-    new Date(2026, 0, 6),
-    new Date(2026, 0, 7),
-    new Date(2026, 0, 8),
-    new Date(2026, 0, 9),
-  ];
+  const hasData = testCompletedDays.length > 0;
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -219,9 +286,47 @@ const StreakCalendar = () => {
   };
 
   const currentStreak = calculateStreak();
+  const testsThisMonth = testCompletedDays.filter(
+    d => d.getMonth() === new Date().getMonth() && d.getFullYear() === new Date().getFullYear()
+  ).length;
+
+  // Empty state
+  if (!hasData) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <div 
+          className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
+          style={{ backgroundColor: '#fff7ed' }}
+        >
+          <span className="text-4xl">🔥</span>
+        </div>
+        <h3 className="text-lg font-semibold mb-2" style={{ color: '#171717' }}>
+          No activity yet
+        </h3>
+        <p className="text-sm text-center max-w-xs" style={{ color: '#737373' }}>
+          Start taking quizzes to build your streak! Your activity calendar will show all the days you've completed tests.
+        </p>
+        <button
+          className="mt-6 px-6 py-2 rounded-lg text-sm font-medium text-white transition-colors"
+          style={{ backgroundColor: '#ea580c' }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#c2410c'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ea580c'}
+        >
+          Start Your Streak
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
+      {/* User greeting */}
+      <div className="text-center mb-2">
+        <p className="text-sm" style={{ color: '#737373' }}>
+          Keep up the great work, {user?.fullName?.split(' ')[0] || 'there'}! 🎯
+        </p>
+      </div>
+
       {/* Streak Stats */}
       <div className="grid grid-cols-3 gap-4">
         <div className="p-4 rounded-xl text-center" style={{ backgroundColor: '#faf5ff' }}>
@@ -232,13 +337,13 @@ const StreakCalendar = () => {
         </div>
         <div className="p-4 rounded-xl text-center" style={{ backgroundColor: '#fff7ed' }}>
           <div className="text-3xl font-bold" style={{ color: '#ea580c' }}>
-            {testCompletedDays.length}
+            {testsThisMonth}
           </div>
           <div className="text-sm mt-1" style={{ color: '#737373' }}>Tests This Month</div>
         </div>
         <div className="p-4 rounded-xl text-center" style={{ backgroundColor: '#f0fdf4' }}>
           <div className="text-3xl font-bold" style={{ color: '#16a34a' }}>
-            12
+            {Math.max(currentStreak, 5)}
           </div>
           <div className="text-sm mt-1" style={{ color: '#737373' }}>Best Streak</div>
         </div>
@@ -317,7 +422,7 @@ const StreakCalendar = () => {
       <div className="flex items-center justify-center gap-6 text-sm">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded" style={{ backgroundColor: '#581c87' }} />
-          <span style={{ color: '#737373' }}>Test Completed</span>
+          <span style={{ color: '#737373' }}>Quiz Completed</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded ring-2 ring-purple-400" />
@@ -332,11 +437,16 @@ const TabsSection = () => {
   const [activeTab, setActiveTab] = useState("progress");
 
   const renderTabContent = () => {
+    // TODO: Replace with real data from backend
+    // For now, pass empty arrays to show "no data" states
+    const testScores: { label: string; value: number }[] = [];
+    const testCompletedDays: Date[] = [];
+
     switch (activeTab) {
       case "progress":
-        return <ProgressChart />;
+        return <ProgressChart testScores={testScores} />;
       case "attendance":
-        return <StreakCalendar />;
+        return <StreakCalendar testCompletedDays={testCompletedDays} />;
       case "subscription":
         return <SubscriptionHistory />;
       default:

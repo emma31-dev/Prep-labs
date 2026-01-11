@@ -1,73 +1,62 @@
 import { useState } from "react";
 
-interface DataPoint {
+interface TestScore {
   label: string;
   value: number;
-}
-
-interface Subject {
-  name: string;
-  color: string;
-  data: DataPoint[];
+  date?: string;
 }
 
 interface ProgressChartProps {
-  subjects?: Subject[];
+  testScores?: TestScore[];
 }
 
-const defaultSubjects: Subject[] = [
-  {
-    name: "All",
-    color: "#581c87",
-    data: [
-      { label: "Test 1", value: 45 },
-      { label: "Test 2", value: 79 },
-      { label: "Test 3", value: 72 },
-      { label: "Test 4", value: 68 },
-      { label: "Test 5", value: 75 },
-    ],
-  },
-  {
-    name: "Maths",
-    color: "#581c87",
-    data: [
-      { label: "Test 1", value: 50 },
-      { label: "Test 2", value: 85 },
-      { label: "Test 3", value: 70 },
-      { label: "Test 4", value: 65 },
-      { label: "Test 5", value: 80 },
-    ],
-  },
-  {
-    name: "Science",
-    color: "#581c87",
-    data: [
-      { label: "Test 1", value: 40 },
-      { label: "Test 2", value: 75 },
-      { label: "Test 3", value: 78 },
-      { label: "Test 4", value: 72 },
-      { label: "Test 5", value: 70 },
-    ],
-  },
-  {
-    name: "English",
-    color: "#581c87",
-    data: [
-      { label: "Test 1", value: 55 },
-      { label: "Test 2", value: 80 },
-      { label: "Test 3", value: 68 },
-      { label: "Test 4", value: 70 },
-      { label: "Test 5", value: 76 },
-    ],
-  },
-];
-
-const ProgressChart = ({ subjects = defaultSubjects }: ProgressChartProps) => {
-  const [activeSubject, setActiveSubject] = useState("All");
+const ProgressChart = ({ testScores = [] }: ProgressChartProps) => {
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
 
-  const currentSubject = subjects.find(s => s.name === activeSubject) || subjects[0];
-  const data = currentSubject.data;
+  // Take last 4 test scores
+  const data = testScores.slice(-4);
+  const hasData = data.length > 0;
+
+  // Empty state
+  if (!hasData) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <div 
+          className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
+          style={{ backgroundColor: '#f3e8ff' }}
+        >
+          <svg 
+            className="w-10 h-10" 
+            style={{ color: '#581c87' }} 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={1.5} 
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" 
+            />
+          </svg>
+        </div>
+        <h3 className="text-lg font-semibold mb-2" style={{ color: '#171717' }}>
+          No tests taken yet
+        </h3>
+        <p className="text-sm text-center max-w-xs" style={{ color: '#737373' }}>
+          Complete your first quiz to see your progress chart here. Your last 4 test scores will be displayed.
+        </p>
+        <button
+          className="mt-6 px-6 py-2 rounded-lg text-sm font-medium text-white transition-colors"
+          style={{ backgroundColor: '#581c87' }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6b21a8'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#581c87'}
+        >
+          Take a Quiz
+        </button>
+      </div>
+    );
+  }
 
   // Calculate SVG path for the area chart
   const width = 600;
@@ -76,7 +65,7 @@ const ProgressChart = ({ subjects = defaultSubjects }: ProgressChartProps) => {
   const chartWidth = width - padding * 2;
   const chartHeight = height - padding;
 
-  const xStep = chartWidth / (data.length - 1);
+  const xStep = chartWidth / (data.length - 1 || 1);
   const yScale = (value: number) => chartHeight - (value / 100) * chartHeight + padding / 2;
 
   const linePath = data
@@ -85,29 +74,21 @@ const ProgressChart = ({ subjects = defaultSubjects }: ProgressChartProps) => {
 
   const areaPath = `${linePath} L ${padding + (data.length - 1) * xStep} ${chartHeight + padding / 2} L ${padding} ${chartHeight + padding / 2} Z`;
 
+  // Calculate average score
+  const avgScore = Math.round(data.reduce((sum, d) => sum + d.value, 0) / data.length);
+
   return (
     <div className="w-full">
-      {/* Subject Filters */}
-      <div className="flex items-center justify-end gap-2 mb-4">
-        {subjects.map((subject) => (
-          <button
-            key={subject.name}
-            onClick={() => setActiveSubject(subject.name)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-colors"
-            style={{
-              backgroundColor: activeSubject === subject.name ? '#581c87' : '#f5f5f5',
-              color: activeSubject === subject.name ? '#ffffff' : '#737373',
-            }}
-          >
-            {subject.name !== "All" && (
-              <span 
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: '#581c87' }}
-              />
-            )}
-            {subject.name}
-          </button>
-        ))}
+      {/* Stats Summary */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <span className="text-sm" style={{ color: '#737373' }}>Average Score</span>
+          <div className="text-2xl font-bold" style={{ color: '#581c87' }}>{avgScore}%</div>
+        </div>
+        <div className="text-right">
+          <span className="text-sm" style={{ color: '#737373' }}>Tests Shown</span>
+          <div className="text-2xl font-bold" style={{ color: '#171717' }}>{data.length}</div>
+        </div>
       </div>
 
       {/* Chart */}

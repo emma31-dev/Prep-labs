@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { LandingHeader, LandingFooter, BackgroundBlobs } from "../components/landing";
 
 const CheckIcon = () => (
@@ -8,8 +9,9 @@ const CheckIcon = () => (
 
 interface PricingTier {
   name: string;
-  price: string;
-  period: string;
+  monthlyPrice: string;
+  annualPrice: string;
+  annualSavings?: string;
   description: string;
   features: string[];
   highlighted?: boolean;
@@ -18,12 +20,12 @@ interface PricingTier {
 
 const pricingTiers: PricingTier[] = [
   {
-    name: "Starter",
-    price: "$0",
-    period: "forever",
-    description: "Perfect for individual educators getting started with AI assessments.",
+    name: "Free",
+    monthlyPrice: "$0",
+    annualPrice: "$0",
+    description: "Perfect for getting started with AI-powered quizzes.",
     features: [
-      "50 AI-generated questions/month",
+      "10 AI-generated quizzes/month",
       "Basic question types",
       "Export to PDF",
       "Email support",
@@ -32,42 +34,43 @@ const pricingTiers: PricingTier[] = [
     buttonText: "Get Started Free",
   },
   {
-    name: "Professional",
-    price: "$29",
-    period: "per month",
-    description: "For educators and small teams who need more power and flexibility.",
+    name: "Pro",
+    monthlyPrice: "$5",
+    annualPrice: "$50",
+    annualSavings: "Save $10/year",
+    description: "For students and educators who need more power and flexibility.",
     features: [
-      "500 AI-generated questions/month",
+      "100 AI-generated quizzes/month",
       "All question types",
-      "Export to PDF, Word, LMS",
+      "Export to PDF, Word",
       "Priority support",
-      "5 user accounts",
-      "Question bank storage",
-      "Analytics dashboard",
+      "Quiz history & analytics",
+      "Custom quiz settings",
     ],
     highlighted: true,
-    buttonText: "Start Free Trial",
+    buttonText: "Get Pro",
   },
   {
-    name: "Enterprise",
-    price: "Custom",
-    period: "contact us",
-    description: "For institutions requiring unlimited scale and custom solutions.",
+    name: "Premium",
+    monthlyPrice: "$10",
+    annualPrice: "$96",
+    annualSavings: "Save $24/year",
+    description: "For power users requiring unlimited access and advanced features.",
     features: [
       "Unlimited AI generations",
-      "Custom AI model training",
+      "Advanced analytics",
       "API access",
       "Dedicated support",
-      "Unlimited users",
-      "SSO integration",
+      "Team collaboration",
       "Custom branding",
-      "SLA guarantee",
+      "Priority processing",
     ],
-    buttonText: "Contact Sales",
+    buttonText: "Get Premium",
   },
 ];
 
 const Pricing = () => {
+  const [isAnnual, setIsAnnual] = useState(false);
 
   return (
     <div className="min-h-screen relative overflow-x-hidden" style={{ backgroundColor: '#F8FAFC' }}>
@@ -103,9 +106,43 @@ const Pricing = () => {
               </span>
             </h1>
             
-            <p className="text-lg lg:text-xl max-w-2xl mx-auto leading-relaxed font-medium" style={{ color: '#64748b' }}>
+            <p className="text-lg lg:text-xl max-w-2xl mx-auto leading-relaxed font-medium mb-8" style={{ color: '#64748b' }}>
               Start free and scale as you grow. No hidden fees, no surprises.
             </p>
+
+            {/* Billing Toggle */}
+            <div className="flex items-center justify-center gap-4">
+              <span 
+                className="text-sm font-medium"
+                style={{ color: !isAnnual ? '#2D1B69' : '#64748b' }}
+              >
+                Monthly
+              </span>
+              <button
+                onClick={() => setIsAnnual(!isAnnual)}
+                className="relative w-14 h-7 rounded-full transition-colors"
+                style={{ backgroundColor: isAnnual ? '#4F46E5' : '#CBD5E1' }}
+              >
+                <span 
+                  className="absolute top-1 w-5 h-5 bg-white rounded-full transition-transform"
+                  style={{ left: isAnnual ? '32px' : '4px' }}
+                />
+              </button>
+              <span 
+                className="text-sm font-medium"
+                style={{ color: isAnnual ? '#2D1B69' : '#64748b' }}
+              >
+                Annual
+              </span>
+              {isAnnual && (
+                <span 
+                  className="text-xs font-bold px-2 py-1 rounded-full"
+                  style={{ backgroundColor: '#DCFCE7', color: '#16A34A' }}
+                >
+                  Save up to 20%
+                </span>
+              )}
+            </div>
           </div>
         </section>
 
@@ -146,20 +183,32 @@ const Pricing = () => {
                     {tier.name}
                   </h3>
                   
-                  <div className="mb-4">
+                  <div className="mb-2">
                     <span 
                       className="text-4xl font-extrabold"
                       style={{ color: tier.highlighted ? 'white' : '#2D1B69' }}
                     >
-                      {tier.price}
+                      {isAnnual ? tier.annualPrice : tier.monthlyPrice}
                     </span>
                     <span 
                       className="text-sm ml-2"
                       style={{ color: tier.highlighted ? 'rgba(255,255,255,0.7)' : '#64748b' }}
                     >
-                      {tier.period}
+                      {isAnnual ? '/year' : '/month'}
                     </span>
                   </div>
+
+                  {isAnnual && tier.annualSavings && (
+                    <div 
+                      className="inline-block text-xs font-bold px-2 py-1 rounded-full mb-4"
+                      style={{ 
+                        backgroundColor: tier.highlighted ? 'rgba(255,255,255,0.2)' : '#DCFCE7', 
+                        color: tier.highlighted ? 'white' : '#16A34A' 
+                      }}
+                    >
+                      {tier.annualSavings}
+                    </div>
+                  )}
                   
                   <p 
                     className="text-sm mb-6"
