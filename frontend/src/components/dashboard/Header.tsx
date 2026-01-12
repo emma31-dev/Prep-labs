@@ -5,6 +5,10 @@ interface HeaderProps {
   userName?: string;
   userAvatar?: string;
   onMenuClick?: () => void;
+  currentView?: string;
+  viewHistory?: string[];
+  onNavigate?: (view: string) => void;
+  onSearch?: (query: string) => void;
 }
 
 const SearchIcon = () => (
@@ -29,12 +33,35 @@ const MenuIcon = () => (
   </svg>
 );
 
-const Header = ({ 
+const ChevronRight = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="9 18 15 12 9 6"/>
+  </svg>
+);
+
+// Map view IDs to display names
+const viewLabels: Record<string, string> = {
+  Home: 'Home',
+  Profile: 'Profile',
+  CreateQuiz: 'Create Quiz',
+  History: 'History',
+  Bookmarked: 'Bookmarked',
+  Resources: 'Resources',
+  Preference: 'Settings',
+  Theme: 'Theme',
+};
+
+const Header = ({
   userName,
   userAvatar,
-  onMenuClick
+  onMenuClick,
+  currentView = "Home",
+  viewHistory = [],
+  onNavigate,
+  onSearch,
 }: HeaderProps) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { user, logout } = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
   
@@ -57,6 +84,12 @@ const Header = ({
     logout();
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    onSearch?.(query);
+  };
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -73,37 +106,61 @@ const Header = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showUserMenu]);
+
   return (
     <header className="h-16 flex items-center justify-between px-4 md:px-6 border-b" style={{ backgroundColor: '#ffffff', borderColor: '#e5e5e5' }}>
-      {/* Mobile Menu Button */}
-      <button 
-        onClick={onMenuClick}
-        className="lg:hidden p-2 rounded-lg transition-colors hover:bg-gray-100 mr-2"
-        style={{ color: '#737373' }}
-      >
-        <MenuIcon />
-      </button>
+      {/* Left Section - Mobile Menu + Breadcrumb */}
+      <div className="flex items-center gap-2">
+        {/* Mobile Menu Button */}
+        <button 
+          onClick={onMenuClick}
+          className="lg:hidden p-2 rounded-lg transition-colors hover:bg-gray-100"
+          style={{ color: '#737373' }}
+        >
+          <MenuIcon />
+        </button>
 
-      {/* Search Bar */}
-      <div className="flex-1 max-w-md">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="What do you want to find?"
-            className="w-full h-10 pl-4 pr-10 rounded-lg border text-sm"
-            style={{ borderColor: '#e5e5e5', backgroundColor: '#ffffff', color: '#171717' }}
-          />
-          <button 
-            className="absolute right-3 top-1/2 -translate-y-1/2"
-            style={{ color: '#737373' }}
-          >
-            <SearchIcon />
-          </button>
-        </div>
+        {/* Breadcrumb Navigation */}
+        <nav className="flex items-center gap-1 text-sm">
+          {viewHistory.slice(0, -1).map((view, index) => (
+            <div key={`${view}-${index}`} className="flex items-center gap-1">
+              <button
+                onClick={() => onNavigate?.(view)}
+                className="hover:underline transition-colors"
+                style={{ color: '#737373' }}
+              >
+                {viewLabels[view] || view}
+              </button>
+              <span style={{ color: '#d4d4d4' }}>
+                <ChevronRight />
+              </span>
+            </div>
+          ))}
+          <span className="font-medium" style={{ color: '#171717' }}>
+            {viewLabels[currentView] || currentView}
+          </span>
+        </nav>
       </div>
 
       {/* Right Section */}
       <div className="flex items-center gap-2 md:gap-4">
+        {/* Search Bar - Only show on Resources view */}
+        {currentView === 'Resources' && (
+          <div className="relative hidden md:block">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none" style={{ color: '#737373' }}>
+              <SearchIcon />
+            </div>
+            <input
+              type="text"
+              placeholder="Search resources..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="w-64 pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              style={{ borderColor: '#e5e5e5' }}
+            />
+          </div>
+        )}
+
         {/* Notification Icon */}
         <button 
           className="p-2 rounded-lg transition-colors hover:bg-gray-100 relative"
@@ -111,7 +168,6 @@ const Header = ({
           title="Notifications"
         >
           <BellIcon />
-          {/* Optional notification dot */}
           <span 
             className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
             style={{ backgroundColor: '#ef4444' }}

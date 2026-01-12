@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useAuth } from "../../hooks/useAuth";
 
 interface NavItem {
   icon: React.ReactNode;
@@ -42,9 +41,10 @@ const HistoryIcon = () => (
   </svg>
 );
 
-const BookmarkIcon = () => (
+const QuizListIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+    <path d="M9 11l3 3L22 4"/>
+    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
   </svg>
 );
 
@@ -77,30 +77,22 @@ const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
 
 const Sidebar = ({ activeItem = "Home", onItemClick, isOpen = false, onClose }: SidebarProps) => {
   const [settingsExpanded, setSettingsExpanded] = useState(false);
-  const { logout } = useAuth();
 
   const navItems: NavItem[] = [
     { icon: <HomeIcon />, label: "Home", id: "Home" },
     { icon: <ProfileIcon />, label: "Profile", id: "Profile" },
     { icon: <QuizIcon />, label: "Create Quiz", id: "CreateQuiz" },
     { icon: <HistoryIcon />, label: "History", id: "History" },
-    { icon: <BookmarkIcon />, label: "Bookmarked", id: "Bookmarked" },
+    { icon: <QuizListIcon />, label: "Quizzes", id: "Quizzes" },
     { icon: <FolderIcon />, label: "Resources", id: "Resources" },
   ];
 
   const settingsItems = [
     { label: "Theme", id: "Theme" },
-    { label: "Logout", id: "Logout" },
     { label: "Preference", id: "Preference" },
   ];
 
   const handleItemClick = (itemId: string) => {
-    // Handle logout separately
-    if (itemId === "Logout") {
-      logout();
-      return;
-    }
-    
     if (onItemClick) {
       onItemClick(itemId);
     }

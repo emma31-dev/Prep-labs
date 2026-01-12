@@ -7,10 +7,40 @@ import PreferencesContent from "../components/dashboard/PreferencesContent";
 import ThemeContent from "../components/dashboard/ThemeContent";
 import HistoryContent from "../components/dashboard/HistoryContent";
 import ResourcesContent from "../components/dashboard/ResourcesContent";
+import QuizzesContent from "../components/dashboard/QuizzesContent";
 
 const Dashboard = () => {
   const [activeView, setActiveView] = useState("Home");
+  const [viewHistory, setViewHistory] = useState<string[]>(["Home"]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Track view changes for breadcrumb (up to 4 items)
+  const handleViewChange = (newView: string) => {
+    if (newView !== activeView) {
+      setViewHistory((prev) => {
+        // If navigating to Home, reset the breadcrumb trail
+        if (newView === 'Home') {
+          return ['Home'];
+        }
+        // If navigating to a view already in history (other than Home), truncate to that point
+        const existingIndex = prev.indexOf(newView);
+        if (existingIndex !== -1) {
+          return prev.slice(0, existingIndex + 1);
+        }
+        // Otherwise add to history, keeping max 4 items
+        const newHistory = [...prev, newView];
+        return newHistory.slice(-4);
+      });
+      setActiveView(newView);
+      // Clear search when changing views
+      setSearchQuery('');
+    }
+  };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
 
   const renderContent = () => {
     switch (activeView) {
@@ -22,15 +52,10 @@ const Dashboard = () => {
         return <CreateQuizContent />;
       case "History":
         return <HistoryContent />;
-      case "Bookmarked":
-        return (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <h1 className="text-3xl font-bold" style={{ color: '#171717' }}>Bookmarked</h1>
-            <p style={{ color: '#737373' }}>Your bookmarked items will appear here.</p>
-          </div>
-        );
+      case "Quizzes":
+        return <QuizzesContent />;
       case "Resources":
-        return <ResourcesContent />;
+        return <ResourcesContent searchQuery={searchQuery} />;
       case "Preference":
         return <PreferencesContent />;
       case "Theme":
@@ -45,7 +70,7 @@ const Dashboard = () => {
       {/* Sidebar */}
       <Sidebar 
         activeItem={activeView} 
-        onItemClick={setActiveView}
+        onItemClick={handleViewChange}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
@@ -53,8 +78,12 @@ const Dashboard = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <Header 
+        <Header
           onMenuClick={() => setSidebarOpen(true)}
+          currentView={activeView}
+          viewHistory={viewHistory}
+          onNavigate={handleViewChange}
+          onSearch={handleSearch}
         />
 
         {/* Page Content */}

@@ -6,7 +6,11 @@ import ResourceUploadModal from './ResourceUploadModal';
 import ResourceFiltersComponent from './ResourceFilters';
 import ResourceCard from './ResourceCard';
 
-const ResourcesContent = () => {
+interface ResourcesContentProps {
+  searchQuery?: string;
+}
+
+const ResourcesContent = ({ searchQuery = '' }: ResourcesContentProps) => {
   const { user, isAuthenticated, isLoading: authLoading, accessToken } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [resources, setResources] = useState<Resource[]>([]);
@@ -69,6 +73,19 @@ const ResourcesContent = () => {
     setSortBy(newSortBy);
     setSortOrder(newSortOrder);
   };
+
+  // Filter resources based on search query
+  const filteredResources = resources.filter(resource => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      resource.title.toLowerCase().includes(query) ||
+      resource.topic.toLowerCase().includes(query) ||
+      (resource.description && resource.description.toLowerCase().includes(query))
+    );
+  });
+
+  const hasNoResults = filteredResources.length === 0 && resources.length > 0 && searchQuery.trim();
 
   return (
     <div className="space-y-6">
@@ -160,9 +177,30 @@ const ResourcesContent = () => {
             Upload Resource
           </button>
         </div>
+      ) : hasNoResults ? (
+        <div
+          className="p-12 rounded-2xl text-center"
+          style={{ backgroundColor: '#ffffff' }}
+        >
+          <div
+            className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
+            style={{ backgroundColor: '#faf5ff' }}
+          >
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#581c87" strokeWidth="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+          </div>
+          <h3 className="text-lg font-bold mb-2" style={{ color: '#171717' }}>
+            No results for "{searchQuery}"
+          </h3>
+          <p className="text-sm" style={{ color: '#737373' }}>
+            Try a different search term or clear the search.
+          </p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {resources.map((resource) => (
+          {filteredResources.map((resource) => (
             <ResourceCard key={resource.id} resource={resource} />
           ))}
         </div>

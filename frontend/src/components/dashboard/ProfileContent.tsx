@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAtom } from "jotai";
-import { userAtom, setAuthAtom, accessTokenAtom, authAtom } from "../../store/authAtoms";
+import { userAtom, setAuthAtom, accessTokenAtom } from "../../store/authAtoms";
 import { ProfileCard, BasicDetails, TabsSection } from "./index";
 import { uploadProfilePhoto } from "../../lib/supabase";
 import { authService } from "../../services/authService";
@@ -8,7 +8,6 @@ import { authService } from "../../services/authService";
 const ProfileContent = () => {
   const [user] = useAtom(userAtom);
   const [accessToken] = useAtom(accessTokenAtom);
-  const [authState] = useAtom(authAtom);
   const [, updateAuth] = useAtom(setAuthAtom);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -36,14 +35,14 @@ const ProfileContent = () => {
       );
 
       if (response.success && response.user) {
-        // Update local auth state
+        // Update local auth state with new user data
         updateAuth({
-          ...authState,
           user: {
             ...user,
             avatarUrl: response.user.avatarUrl,
           },
         });
+        console.log('Avatar updated in auth state:', response.user.avatarUrl);
       } else {
         throw new Error(response.message || "Failed to update profile");
       }
