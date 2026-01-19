@@ -9,7 +9,16 @@ import Signup from './pages/Signup';
 import VerifyEmail from './pages/VerifyEmail';
 import Quiz from './pages/Quiz';
 import { useAuth } from './hooks/useAuth';
+import { useTheme } from './hooks/useTheme';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+
+/**
+ * Theme initializer component that applies theme to document
+ */
+const ThemeInitializer = ({ children }: { children: React.ReactNode }) => {
+  useTheme(); // This hook applies theme classes to document
+  return <>{children}</>;
+};
 
 /**
  * Auth initialization component that handles session restoration
@@ -35,27 +44,29 @@ const AuthInitializer = ({ children }: { children: React.ReactNode }) => {
 function App() {
   return (
     <Provider>
-      <Router>
-        <AuthInitializer>
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/auth/login" element={<Login />} />
-            <Route path="/auth/signup" element={<Signup />} />
-            <Route path="/auth/verify" element={<VerifyEmail />} />
-            <Route path="/dashboard" element={
-              <ProtectedRoute requireEmailVerification={false}>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/quiz/:id" element={
-              <ProtectedRoute requireEmailVerification={false}>
-                <Quiz />
-              </ProtectedRoute>
-            } />
-          </Routes>
-        </AuthInitializer>
-      </Router>
+      <ThemeInitializer>
+        <Router>
+          <AuthInitializer>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/auth/login" element={<Login />} />
+              <Route path="/auth/signup" element={<Signup />} />
+              <Route path="/auth/verify" element={<VerifyEmail />} />
+              <Route path="/dashboard" element={
+                <ProtectedRoute requireEmailVerification={false}>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/quiz/:id" element={
+                <ProtectedRoute requireEmailVerification={false}>
+                  <Quiz />
+                </ProtectedRoute>
+              } />
+            </Routes>
+          </AuthInitializer>
+        </Router>
+      </ThemeInitializer>
     </Provider>
   );
 }

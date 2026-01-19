@@ -1,9 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  /* Dark Purple Primary */
-  --color-primary: 88 28 135; /* #581c87 - purple-900 */
-  --color-primary-foreground: 250 250 250; /* #fafafa - neutral-50 */
+  /* Light theme colors */
+  --color-background: 255 255 255; /* #ffffff */
+  --color-surface: 248 250 252; /* #f8fafc */
+  --color-surface-secondary: 241 245 249; /* #f1f5f9 */
+  --color-text: 23 23 23; /* #171717 */
+  --color-text-secondary: 100 116 139; /* #64748b */
+  --color-text-muted: 148 163 184; /* #94a3b8 */
+  --color-border: 226 232 240; /* #e2e8f0 */
+  --color-border-secondary: 203 213 225; /* #cbd5e1 */
+  --color-primary: 88 28 135; /* #581c87 */
+  --color-primary-hover: 107 33 168; /* #6b21a8 */
   
   /* Orange Secondary */
   --color-secondary: 251 146 60; /* #fb923c - orange-400 */
@@ -13,16 +21,11 @@
   --color-accent: 250 245 255; /* #faf5ff - purple-50 */
   --color-accent-foreground: 88 28 135; /* #581c87 - purple-900 */
   
-  /* Background colors */
-  --color-background: 255 255 255; /* #ffffff - white */
-  --color-foreground: 23 23 23; /* #171717 - neutral-900 */
-  
   /* Muted colors */
   --color-muted: 245 245 245; /* #f5f5f5 - neutral-100 */
   --color-muted-foreground: 115 115 115; /* #737373 - neutral-500 */
   
   /* Border and input */
-  --color-border: 229 229 229; /* #e5e5e5 - neutral-200 */
   --color-input: 229 229 229; /* #e5e5e5 - neutral-200 */
   --color-ring: 88 28 135; /* #581c87 - purple-900 */
   
@@ -32,9 +35,17 @@
 }
 
 .dark {
-  /* Dark mode colors */
-  --color-background: 23 23 23; /* #171717 - neutral-900 */
-  --color-foreground: 250 250 250; /* #fafafa - neutral-50 */
+  /* Dark theme colors */
+  --color-background: 15 23 42; /* #0f172a */
+  --color-surface: 30 41 59; /* #1e293b */
+  --color-surface-secondary: 51 65 85; /* #334155 */
+  --color-text: 241 245 249; /* #f1f5f9 */
+  --color-text-secondary: 203 213 225; /* #cbd5e1 */
+  --color-text-muted: 148 163 184; /* #94a3b8 */
+  --color-border: 51 65 85; /* #334155 */
+  --color-border-secondary: 71 85 105; /* #475569 */
+  --color-primary: 124 58 237; /* #7c3aed */
+  --color-primary-hover: 139 92 246; /* #8b5cf6 */
   
   --color-muted: 38 38 38; /* #262626 - neutral-800 */
   --color-muted-foreground: 163 163 163; /* #a3a3a3 - neutral-400 */
@@ -42,14 +53,55 @@
   --color-accent: 59 7 100; /* #3b0764 - purple-950 */
   --color-accent-foreground: 250 245 255; /* #faf5ff - purple-50 */
   
-  --color-border: 38 38 38; /* #262626 - neutral-800 */
   --color-input: 38 38 38; /* #262626 - neutral-800 */
+}
+
+/* High contrast mode */
+.high-contrast {
+  --color-text: 0 0 0; /* Pure black */
+  --color-background: 255 255 255; /* Pure white */
+  --color-border: 0 0 0; /* Pure black borders */
+}
+
+.high-contrast.dark {
+  --color-text: 255 255 255; /* Pure white */
+  --color-background: 0 0 0; /* Pure black */
+  --color-border: 255 255 255; /* Pure white borders */
+}
+
+/* Reduced motion */
+.reduce-motion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* Compact mode */
+.compact {
+  --spacing-scale: 0.75;
+}
+
+.compact .space-y-4 > * + * {
+  margin-top: calc(1rem * var(--spacing-scale, 1));
+}
+
+.compact .space-y-6 > * + * {
+  margin-top: calc(1.5rem * var(--spacing-scale, 1));
+}
+
+.compact .p-6 {
+  padding: calc(1.5rem * var(--spacing-scale, 1));
 }
 
 body {
   margin: 0;
   padding: 0;
   background-color: rgb(var(--color-background));
-  color: rgb(var(--color-foreground));
+  color: rgb(var(--color-text));
   font-family: system-ui, -apple-system, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+body.reduce-motion {
+  transition: none;
 }

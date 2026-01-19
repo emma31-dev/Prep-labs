@@ -111,7 +111,21 @@ const CreateQuizContent = () => {
       clearInterval(progressInterval);
       setIsGenerating(false);
       setGenerationProgress(0);
-      setGenerationError(err instanceof Error ? err.message : "Failed to generate quiz");
+      // Parse error message for user-friendly display
+      const errorMsg = err instanceof Error ? err.message : "Failed to generate quiz";
+      let friendlyError = errorMsg;
+      
+      if (errorMsg.includes("429") || errorMsg.includes("Too Many Requests") || errorMsg.includes("quota")) {
+        friendlyError = "AI service quota exceeded. Please try again later or contact support.";
+      } else if (errorMsg.includes("API key") || errorMsg.includes("expired") || errorMsg.includes("invalid")) {
+        friendlyError = "AI service configuration error. Please contact support.";
+      } else if (errorMsg.includes("timeout") || errorMsg.includes("Timeout")) {
+        friendlyError = "Request timed out. Please try again with fewer questions.";
+      } else if (errorMsg.includes("Failed to load") || errorMsg.includes("images")) {
+        friendlyError = "Failed to process resource images. Please try a different resource.";
+      }
+      
+      setGenerationError(friendlyError);
     }
   };
 

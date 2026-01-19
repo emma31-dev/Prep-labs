@@ -1,9 +1,11 @@
-import { useState } from "react";
-
-type ThemeMode = 'light' | 'dark' | 'auto';
+import { useAtom } from 'jotai';
+import { themeAtom, displaySettingsAtom, type ThemeMode } from '../../store/settingsAtoms';
+import { useThemeColors } from '../../hooks/useTheme';
 
 const ThemeContent = () => {
-  const [selectedTheme, setSelectedTheme] = useState<ThemeMode>('light');
+  const [selectedTheme, setSelectedTheme] = useAtom(themeAtom);
+  const [displaySettings, setDisplaySettings] = useAtom(displaySettingsAtom);
+  const colors = useThemeColors();
 
   const ThemePreview = ({ mode, isSelected, onClick }: { 
     mode: ThemeMode; 
@@ -15,7 +17,7 @@ const ThemeContent = () => {
       return (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold capitalize" style={{ color: '#171717' }}>
+            <h3 className="text-lg font-semibold capitalize" style={{ color: colors.text }}>
               Auto
             </h3>
             <button
@@ -98,7 +100,7 @@ const ThemeContent = () => {
     return (
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold capitalize" style={{ color: '#171717' }}>
+          <h3 className="text-lg font-semibold capitalize" style={{ color: colors.text }}>
             {mode}
           </h3>
           <button
@@ -163,17 +165,17 @@ const ThemeContent = () => {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Page Title */}
       <div>
-        <h1 className="text-3xl font-bold" style={{ color: '#171717' }}>
+        <h1 className="text-3xl font-bold" style={{ color: colors.text }}>
           Theme Settings
         </h1>
-        <p className="text-lg mt-2" style={{ color: '#737373' }}>
+        <p className="text-lg mt-2" style={{ color: colors.textSecondary }}>
           Choose your preferred appearance for the interface
         </p>
       </div>
 
       {/* Theme Selection */}
-      <div className="rounded-2xl p-6 shadow-sm" style={{ backgroundColor: '#ffffff' }}>
-        <h2 className="text-xl font-semibold mb-6" style={{ color: '#171717' }}>
+      <div className="rounded-2xl p-6 shadow-sm" style={{ backgroundColor: colors.surface }}>
+        <h2 className="text-xl font-semibold mb-6" style={{ color: colors.text }}>
           Appearance
         </h2>
         
@@ -199,9 +201,20 @@ const ThemeContent = () => {
         <div className="mt-8 flex justify-end">
           <button 
             className="px-6 py-3 rounded-lg font-semibold text-white transition-colors"
-            style={{ backgroundColor: '#581c87' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6b21a8'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#581c87'}
+            style={{ backgroundColor: colors.primary }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.primaryHover}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.primary}
+            onClick={() => {
+              // Theme is already applied via the atom, just show feedback
+              const button = document.activeElement as HTMLButtonElement;
+              if (button) {
+                const originalText = button.textContent;
+                button.textContent = 'Applied!';
+                setTimeout(() => {
+                  button.textContent = originalText;
+                }, 1000);
+              }
+            }}
           >
             Apply Theme
           </button>
@@ -209,60 +222,75 @@ const ThemeContent = () => {
       </div>
 
       {/* Additional Settings */}
-      <div className="rounded-2xl p-6 shadow-sm" style={{ backgroundColor: '#ffffff' }}>
-        <h2 className="text-xl font-semibold mb-4" style={{ color: '#171717' }}>
+      <div className="rounded-2xl p-6 shadow-sm" style={{ backgroundColor: colors.surface }}>
+        <h2 className="text-xl font-semibold mb-4" style={{ color: colors.text }}>
           Display Options
         </h2>
         
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-medium" style={{ color: '#171717' }}>
+              <h3 className="font-medium" style={{ color: colors.text }}>
                 High Contrast
               </h3>
-              <p className="text-sm" style={{ color: '#737373' }}>
+              <p className="text-sm" style={{ color: colors.textSecondary }}>
                 Increase contrast for better visibility
               </p>
             </div>
             <button
+              onClick={() => setDisplaySettings({ highContrast: !displaySettings.highContrast })}
               className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
-              style={{ backgroundColor: '#e5e7eb' }}
+              style={{ backgroundColor: displaySettings.highContrast ? colors.primary : colors.border }}
             >
-              <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1" />
+              <span 
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  displaySettings.highContrast ? 'translate-x-6' : 'translate-x-1'
+                }`} 
+              />
             </button>
           </div>
 
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-medium" style={{ color: '#171717' }}>
+              <h3 className="font-medium" style={{ color: colors.text }}>
                 Reduce Motion
               </h3>
-              <p className="text-sm" style={{ color: '#737373' }}>
+              <p className="text-sm" style={{ color: colors.textSecondary }}>
                 Minimize animations and transitions
               </p>
             </div>
             <button
+              onClick={() => setDisplaySettings({ reduceMotion: !displaySettings.reduceMotion })}
               className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
-              style={{ backgroundColor: '#e5e7eb' }}
+              style={{ backgroundColor: displaySettings.reduceMotion ? colors.primary : colors.border }}
             >
-              <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1" />
+              <span 
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  displaySettings.reduceMotion ? 'translate-x-6' : 'translate-x-1'
+                }`} 
+              />
             </button>
           </div>
 
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-medium" style={{ color: '#171717' }}>
+              <h3 className="font-medium" style={{ color: colors.text }}>
                 Compact Mode
               </h3>
-              <p className="text-sm" style={{ color: '#737373' }}>
+              <p className="text-sm" style={{ color: colors.textSecondary }}>
                 Show more content by reducing spacing
               </p>
             </div>
             <button
+              onClick={() => setDisplaySettings({ compactMode: !displaySettings.compactMode })}
               className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
-              style={{ backgroundColor: '#e5e7eb' }}
+              style={{ backgroundColor: displaySettings.compactMode ? colors.primary : colors.border }}
             >
-              <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1" />
+              <span 
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  displaySettings.compactMode ? 'translate-x-6' : 'translate-x-1'
+                }`} 
+              />
             </button>
           </div>
         </div>
