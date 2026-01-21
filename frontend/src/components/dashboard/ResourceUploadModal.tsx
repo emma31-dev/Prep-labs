@@ -184,12 +184,10 @@ const ResourceUploadModal = ({ isOpen, onClose, onSuccess }: ResourceUploadModal
 
       setUploadSuccess(true);
 
-      // Close modal and refresh after short delay
-      setTimeout(() => {
-        resetForm();
-        onSuccess();
-        onClose();
-      }, 1500);
+      // Close modal and refresh immediately
+      resetForm();
+      onSuccess();
+      onClose();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Upload failed';
       setUploadError(errorMessage);

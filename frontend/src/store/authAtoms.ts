@@ -12,6 +12,10 @@ export interface User {
   age: number | null;
   planType: 'free' | 'pro' | 'premium';
   emailVerified: boolean;
+  // Statistics
+  streakCount?: number;
+  bestStreak?: number;
+  totalTestsTaken?: number;
 }
 
 /**

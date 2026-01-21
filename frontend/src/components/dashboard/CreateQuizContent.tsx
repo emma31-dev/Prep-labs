@@ -104,8 +104,7 @@ const CreateQuizContent = () => {
       clearInterval(progressInterval);
       setGenerationProgress(100);
 
-      // Brief delay to show completion
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Navigate immediately to the quiz
       navigate(`/quiz/${quiz.id}`);
     } catch (err) {
       clearInterval(progressInterval);

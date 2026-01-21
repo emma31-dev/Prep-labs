@@ -1,52 +1,129 @@
 import { useAtom } from "jotai";
 import { userAtom } from "../../store/authAtoms";
+import { useUserStats } from "../../hooks/useUserStats";
 
 const HomeContent = () => {
   const [user] = useAtom(userAtom);
+  const { stats, isLoading } = useUserStats();
   
   // Get first name for greeting
   const firstName = user?.fullName?.split(' ')[0] || 'User';
   
-  // Mock data
-  const recentActivity = [
-    {
-      id: 1,
-      title: "Algebra Fundamentals II",
-      time: "2 hours ago",
-      questions: 45,
-      score: 88,
-      status: "exceeded",
-      icon: "math",
-      color: "#581c87",
-    },
-    {
-      id: 2,
-      title: "Shakespearean Literature",
-      time: "5 hours ago",
-      questions: 20,
-      score: 72,
-      status: "at-target",
-      icon: "book",
-      color: "#ea580c",
-    },
-    {
-      id: 3,
-      title: "Physics - Mechanics",
-      time: "Yesterday",
-      questions: 30,
-      score: 65,
-      status: "below",
-      icon: "science",
-      color: "#2563eb",
-    },
-  ];
+  // Use real test history data
+  const recentActivity = stats?.testHistory?.slice(0, 3).map((test, index) => ({
+    id: index + 1,
+    title: test.title,
+    time: formatTimeAgo(test.completedAt),
+    questions: 20, // Default since we don't store question count in test results
+    score: test.score,
+    status: test.score >= 70 ? "exceeded" : test.score >= 60 ? "at-target" : "below",
+    icon: getSubjectIcon(test.title),
+    color: getScoreColor(test.score),
+  })) || [];
 
-  const subjectMastery = [
-    { subject: "Mathematics", progress: 78, color: "#581c87" },
-    { subject: "English", progress: 65, color: "#ea580c" },
-    { subject: "Science", progress: 52, color: "#2563eb" },
-    { subject: "History", progress: 45, color: "#16a34a" },
-  ];
+  // Calculate subject mastery from test history
+  const subjectMastery = calculateSubjectMastery(stats?.testHistory || []);
+
+  // Helper functions
+  function formatTimeAgo(dateString: string): string {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    if (diffInHours < 48) return 'Yesterday';
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+    
+    return date.toLocaleDateString();
+  }
+
+  function getSubjectIcon(title: string): string {
+    const titleLower = title.toLowerCase();
+    if (titleLower.includes('math') || titleLower.includes('algebra') || titleLower.includes('calculus')) return "math";
+    if (titleLower.includes('english') || titleLower.includes('literature') || titleLower.includes('writing')) return "book";
+    if (titleLower.includes('science') || titleLower.includes('physics') || titleLower.includes('chemistry') || titleLower.includes('biology')) return "science";
+    if (titleLower.includes('history') || titleLower.includes('geography')) return "history";
+    return "book";
+  }
+
+  function getScoreColor(score: number): string {
+    if (score >= 90) return "#16a34a";
+    if (score >= 80) return "#2563eb";
+    if (score >= 70) return "#f59e0b";
+    if (score >= 60) return "#ea580c";
+    return "#dc2626";
+  }
+
+  function calculateSubjectMastery(testHistory: any[]): Array<{subject: string, progress: number, color: string}> {
+    if (!testHistory || testHistory.length === 0) {
+      return [
+        { subject: "Mathematics", progress: 0, color: "#581c87" },
+        { subject: "English", progress: 0, color: "#ea580c" },
+        { subject: "Science", progress: 0, color: "#2563eb" },
+        { subject: "History", progress: 0, color: "#16a34a" },
+      ];
+    }
+
+    const subjectScores: Record<string, number[]> = {};
+    
+    testHistory.forEach(test => {
+      const title = test.title.toLowerCase();
+      let subject = "Other";
+      
+      if (title.includes('math') || title.includes('algebra') || title.includes('calculus')) {
+        subject = "Mathematics";
+      } else if (title.includes('english') || title.includes('literature') || title.includes('writing')) {
+        subject = "English";
+      } else if (title.includes('science') || title.includes('physics') || title.includes('chemistry') || title.includes('biology')) {
+        subject = "Science";
+      } else if (title.includes('history') || title.includes('geography')) {
+        subject = "History";
+      }
+      
+      if (!subjectScores[subject]) {
+        subjectScores[subject] = [];
+      }
+      subjectScores[subject].push(test.score);
+    });
+
+    const subjects = [
+      { name: "Mathematics", color: "#581c87" },
+      { name: "English", color: "#ea580c" },
+      { name: "Science", color: "#2563eb" },
+      { name: "History", color: "#16a34a" },
+    ];
+
+    return subjects.map(subject => ({
+      subject: subject.name,
+      progress: subjectScores[subject.name] 
+        ? Math.round(subjectScores[subject.name].reduce((sum, score) => sum + score, 0) / subjectScores[subject.name].length)
+        : 0,
+      color: subject.color
+    }));
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        {/* Loading skeleton */}
+        <div className="rounded-2xl p-6 md:p-8 bg-gray-200 animate-pulse h-32"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-gray-200 animate-pulse rounded-xl h-40"></div>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="bg-gray-200 animate-pulse rounded-xl h-64"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   // Circular Progress Component
   const CircularProgress = ({
@@ -372,21 +449,25 @@ const HomeContent = () => {
           <h3 className="text-xs font-bold uppercase tracking-wider mb-4 text-orange-100">Your Streak</h3>
           <div className="text-center py-6">
             <div className="text-6xl mb-2">🔥</div>
-            <div className="text-4xl font-bold text-white mb-1">8 Days</div>
-            <p className="text-orange-100 text-sm">Keep going! You're on fire!</p>
+            <div className="text-4xl font-bold text-white mb-1">
+              {stats?.streakCount || 0} Days
+            </div>
+            <p className="text-orange-100 text-sm">
+              {stats?.streakCount ? "Keep going! You're on fire!" : "Start your streak today!"}
+            </p>
           </div>
           <div className="flex justify-between text-sm text-white mt-4 pt-4 border-t border-orange-400/30">
             <div>
               <div className="text-orange-100 text-xs">Best Streak</div>
-              <div className="font-bold">12 Days</div>
+              <div className="font-bold">{stats?.bestStreak || 0} Days</div>
             </div>
             <div>
               <div className="text-orange-100 text-xs">This Month</div>
-              <div className="font-bold">24 Tests</div>
+              <div className="font-bold">{stats?.thisMonthAttendance || 0} Tests</div>
             </div>
             <div>
               <div className="text-orange-100 text-xs">Avg Score</div>
-              <div className="font-bold">78%</div>
+              <div className="font-bold">{stats?.averageScore || 0}%</div>
             </div>
           </div>
         </div>

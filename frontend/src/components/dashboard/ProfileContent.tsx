@@ -4,6 +4,7 @@ import { userAtom, setAuthAtom, accessTokenAtom } from "../../store/authAtoms";
 import { ProfileCard, BasicDetails, TabsSection } from "./index";
 import { uploadProfilePhoto } from "../../lib/supabase";
 import { authService } from "../../services/authService";
+import StatsCard from "./StatsCard";
 
 const ProfileContent = () => {
   const [user] = useAtom(userAtom);
@@ -68,6 +69,9 @@ const ProfileContent = () => {
         onAvatarChange={handleAvatarChange}
         isUploading={isUploading}
       />
+
+      {/* Statistics Card */}
+      <StatsCard />
 
       {/* Basic Details */}
       <BasicDetails details={basicDetails} />

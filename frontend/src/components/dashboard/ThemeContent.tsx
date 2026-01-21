@@ -208,11 +208,13 @@ const ThemeContent = () => {
               // Theme is already applied via the atom, just show feedback
               const button = document.activeElement as HTMLButtonElement;
               if (button) {
-                const originalText = button.textContent;
                 button.textContent = 'Applied!';
-                setTimeout(() => {
-                  button.textContent = originalText;
-                }, 1000);
+                // Reset text immediately after a brief moment for visual feedback
+                requestAnimationFrame(() => {
+                  setTimeout(() => {
+                    button.textContent = 'Apply Theme';
+                  }, 100);
+                });
               }
             }}
           >

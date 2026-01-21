@@ -1,372 +1,488 @@
+import { useState } from "react";
+import { useUserStats } from "../../hooks/useUserStats";
+
+interface FilterOption {
+  id: string;
+  label: string;
+  value: string;
+}
+
 const HistoryContent = () => {
-  // Mock data for test history
-  const testHistory = [
-    { id: 1, title: "MCT Mock Test - Session 1", date: "Jan 9, 2026", score: 85, total: 100, duration: "28 min", status: "passed" },
-    { id: 2, title: "Contract Law Quiz", date: "Jan 8, 2026", score: 72, total: 100, duration: "22 min", status: "passed" },
-    { id: 3, title: "Biology Chapter 5", date: "Jan 7, 2026", score: 45, total: 100, duration: "30 min", status: "failed" },
-    { id: 4, title: "Mathematics - Calculus", date: "Jan 6, 2026", score: 90, total: 100, duration: "25 min", status: "passed" },
-    { id: 5, title: "History - World War II", date: "Jan 5, 2026", score: 68, total: 100, duration: "35 min", status: "passed" },
-    { id: 6, title: "Physics - Mechanics", date: "Jan 4, 2026", score: 55, total: 100, duration: "40 min", status: "failed" },
+  const { stats, isLoading, error } = useUserStats();
+  const [selectedFilter, setSelectedFilter] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('recent');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  const filterOptions: FilterOption[] = [
+    { id: 'all', label: 'All Tests', value: 'all' },
+    { id: 'passed', label: 'Passed (≥70%)', value: 'passed' },
+    { id: 'failed', label: 'Failed (<70%)', value: 'failed' },
+    { id: 'excellent', label: 'Excellent (≥90%)', value: 'excellent' },
   ];
 
-  // Topic distribution data for pie chart
-  const topicData = [
-    { topic: "Law", percentage: 30, color: "#581c87", count: 12 },
-    { topic: "Science", percentage: 25, color: "#ea580c", count: 10 },
-    { topic: "Mathematics", percentage: 20, color: "#16a34a", count: 8 },
-    { topic: "History", percentage: 15, color: "#2563eb", count: 6 },
-    { topic: "Others", percentage: 10, color: "#64748b", count: 4 },
+  const sortOptions: FilterOption[] = [
+    { id: 'recent', label: 'Most Recent', value: 'recent' },
+    { id: 'oldest', label: 'Oldest First', value: 'oldest' },
+    { id: 'highest', label: 'Highest Score', value: 'highest' },
+    { id: 'lowest', label: 'Lowest Score', value: 'lowest' },
   ];
 
-  // Stats summary
-  const stats = {
-    totalTests: 40,
-    avgScore: 74,
-    passRate: 82,
-    totalTime: "18h 45m",
-    bestStreak: 12,
-    currentStreak: 8,
+  // Filter and sort test history
+  const getFilteredAndSortedTests = () => {
+    if (!stats?.testHistory) return [];
+
+    let filtered = [...stats.testHistory];
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(test => 
+        test.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply score filter
+    switch (selectedFilter) {
+      case 'passed':
+        filtered = filtered.filter(test => test.score >= 70);
+        break;
+      case 'failed':
+        filtered = filtered.filter(test => test.score < 70);
+        break;
+      case 'excellent':
+        filtered = filtered.filter(test => test.score >= 90);
+        break;
+    }
+
+    // Apply sorting
+    switch (sortBy) {
+      case 'oldest':
+        filtered.sort((a, b) => new Date(a.completedAt).getTime() - new Date(b.completedAt).getTime());
+        break;
+      case 'highest':
+        filtered.sort((a, b) => b.score - a.score);
+        break;
+      case 'lowest':
+        filtered.sort((a, b) => a.score - b.score);
+        break;
+      default: // recent
+        filtered.sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime());
+    }
+
+    return filtered;
   };
 
-  // SVG Pie Chart component
-  const PieChart = () => {
-    const size = 200;
-    const center = size / 2;
-    const radius = 80;
+  const filteredTests = getFilteredAndSortedTests();
 
-    const getCoordinatesForPercent = (percent: number) => {
-      const x = center + radius * Math.cos(2 * Math.PI * percent - Math.PI / 2);
-      const y = center + radius * Math.sin(2 * Math.PI * percent - Math.PI / 2);
-      return [x, y];
+  // Calculate comprehensive statistics
+  const calculateStats = () => {
+    if (!stats?.testHistory || stats.testHistory.length === 0) {
+      return {
+        totalTests: 0,
+        avgScore: 0,
+        passRate: 0,
+        totalTime: "0h 0m",
+        bestStreak: 0,
+        currentStreak: 0,
+        excellentCount: 0,
+        improvementTrend: 0,
+      };
+    }
+
+    const tests = stats.testHistory;
+    const totalTests = tests.length;
+    const avgScore = Math.round(tests.reduce((sum, test) => sum + test.score, 0) / totalTests);
+    const passedTests = tests.filter(test => test.score >= 70).length;
+    const passRate = Math.round((passedTests / totalTests) * 100);
+    const excellentCount = tests.filter(test => test.score >= 90).length;
+
+    // Calculate improvement trend (last 5 vs previous 5)
+    let improvementTrend = 0;
+    if (tests.length >= 10) {
+      const recent5 = tests.slice(0, 5);
+      const previous5 = tests.slice(5, 10);
+      const recentAvg = recent5.reduce((sum, test) => sum + test.score, 0) / 5;
+      const previousAvg = previous5.reduce((sum, test) => sum + test.score, 0) / 5;
+      improvementTrend = Math.round(recentAvg - previousAvg);
+    }
+
+    return {
+      totalTests,
+      avgScore,
+      passRate,
+      totalTime: "0h 0m", // Would need duration data
+      bestStreak: stats.bestStreak || 0,
+      currentStreak: stats.streakCount || 0,
+      excellentCount,
+      improvementTrend,
     };
-
-    let cumulativePercent = 0;
-
-    return (
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        {topicData.map((slice, index) => {
-          const [startX, startY] = getCoordinatesForPercent(cumulativePercent);
-          cumulativePercent += slice.percentage / 100;
-          const [endX, endY] = getCoordinatesForPercent(cumulativePercent);
-          const largeArcFlag = slice.percentage > 50 ? 1 : 0;
-
-          const pathData = [
-            `M ${center} ${center}`,
-            `L ${startX} ${startY}`,
-            `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`,
-            "Z",
-          ].join(" ");
-
-          return <path key={index} d={pathData} fill={slice.color} className="transition-all hover:opacity-80" />;
-        })}
-        {/* Center circle for donut effect */}
-        <circle cx={center} cy={center} r={50} fill="white" />
-        <text x={center} y={center - 8} textAnchor="middle" className="text-2xl font-bold" fill="#171717">
-          {stats.totalTests}
-        </text>
-        <text x={center} y={center + 12} textAnchor="middle" className="text-xs" fill="#737373">
-          Total Tests
-        </text>
-      </svg>
-    );
   };
+
+  const statsData = calculateStats();
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) {
+      return 'Just now';
+    } else if (diffInHours < 24) {
+      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    } else if (diffInHours < 48) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric',
+        year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+      });
+    }
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 90) return '#16a34a'; // Green
+    if (score >= 80) return '#2563eb'; // Blue
+    if (score >= 70) return '#f59e0b'; // Orange
+    if (score >= 60) return '#ea580c'; // Dark orange
+    return '#dc2626'; // Red
+  };
+
+  const getScoreIcon = (score: number) => {
+    if (score >= 90) return '🏆';
+    if (score >= 80) return '🎯';
+    if (score >= 70) return '✅';
+    if (score >= 60) return '📈';
+    return '❌';
+  };
+
+  const getScoreBadge = (score: number) => {
+    if (score >= 90) return { text: 'Excellent', color: '#16a34a', bg: '#dcfce7' };
+    if (score >= 80) return { text: 'Good', color: '#2563eb', bg: '#dbeafe' };
+    if (score >= 70) return { text: 'Passed', color: '#f59e0b', bg: '#fef3c7' };
+    if (score >= 60) return { text: 'Fair', color: '#ea580c', bg: '#fed7aa' };
+    return { text: 'Failed', color: '#dc2626', bg: '#fecaca' };
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        {/* Stats skeleton */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-white rounded-xl p-4 shadow-sm animate-pulse">
+              <div className="h-8 bg-gray-200 rounded mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded"></div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Filters skeleton */}
+        <div className="flex gap-4 animate-pulse">
+          <div className="h-10 bg-gray-200 rounded w-32"></div>
+          <div className="h-10 bg-gray-200 rounded w-32"></div>
+          <div className="h-10 bg-gray-200 rounded flex-1"></div>
+        </div>
+
+        {/* List skeleton */}
+        <div className="space-y-3">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="bg-white rounded-lg p-4 shadow-sm animate-pulse">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
+                  <div>
+                    <div className="h-4 bg-gray-200 rounded w-48 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-32"></div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="h-6 bg-gray-200 rounded w-16 mb-1"></div>
+                  <div className="h-4 bg-gray-200 rounded w-12"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="text-red-500 text-6xl mb-4">⚠️</div>
+        <h3 className="text-xl font-semibold mb-2" style={{ color: '#171717' }}>
+          Failed to load test history
+        </h3>
+        <p className="text-sm text-center mb-6" style={{ color: '#737373' }}>
+          {error}
+        </p>
+        <button
+          className="px-6 py-2 rounded-lg text-sm font-medium text-white transition-colors"
+          style={{ backgroundColor: '#581c87' }}
+          onClick={() => window.location.reload()}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  // Empty state
+  if (!stats?.testHistory || stats.testHistory.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <div 
+          className="w-24 h-24 rounded-full flex items-center justify-center mb-6"
+          style={{ backgroundColor: '#f3e8ff' }}
+        >
+          <svg 
+            className="w-12 h-12" 
+            style={{ color: '#581c87' }} 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={1.5} 
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
+            />
+          </svg>
+        </div>
+        <h3 className="text-xl font-semibold mb-3" style={{ color: '#171717' }}>
+          No test history yet
+        </h3>
+        <p className="text-sm text-center max-w-md mb-8" style={{ color: '#737373' }}>
+          Start taking quizzes to build your test history! All your completed tests will appear here with detailed analytics and performance insights.
+        </p>
+        <button
+          className="px-8 py-3 rounded-lg text-sm font-medium text-white transition-colors"
+          style={{ backgroundColor: '#581c87' }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6b21a8'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#581c87'}
+        >
+          Take Your First Quiz
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold" style={{ color: "#171717" }}>
-          Test History & Analytics
-        </h1>
-        <p className="text-lg mt-2" style={{ color: "#737373" }}>
-          Track your progress and analyze your performance
-        </p>
-      </div>
-
-      {/* Stats Overview Cards */}
+    <div className="space-y-6">
+      {/* Comprehensive Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div className="rounded-xl p-4 shadow-sm" style={{ backgroundColor: "#ffffff" }}>
-          <div className="text-2xl font-bold" style={{ color: "#581c87" }}>
-            {stats.totalTests}
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <div className="text-2xl font-bold" style={{ color: '#581c87' }}>
+            {statsData.totalTests}
           </div>
-          <div className="text-sm" style={{ color: "#737373" }}>
-            Total Tests
-          </div>
+          <div className="text-sm" style={{ color: '#737373' }}>Total Tests</div>
         </div>
-        <div className="rounded-xl p-4 shadow-sm" style={{ backgroundColor: "#ffffff" }}>
-          <div className="text-2xl font-bold" style={{ color: "#ea580c" }}>
-            {stats.avgScore}%
+        
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <div className="text-2xl font-bold" style={{ color: '#ea580c' }}>
+            {statsData.avgScore}%
           </div>
-          <div className="text-sm" style={{ color: "#737373" }}>
-            Avg Score
-          </div>
+          <div className="text-sm" style={{ color: '#737373' }}>Average Score</div>
         </div>
-        <div className="rounded-xl p-4 shadow-sm" style={{ backgroundColor: "#ffffff" }}>
-          <div className="text-2xl font-bold" style={{ color: "#16a34a" }}>
-            {stats.passRate}%
+        
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <div className="text-2xl font-bold" style={{ color: '#16a34a' }}>
+            {statsData.passRate}%
           </div>
-          <div className="text-sm" style={{ color: "#737373" }}>
-            Pass Rate
-          </div>
+          <div className="text-sm" style={{ color: '#737373' }}>Pass Rate</div>
         </div>
-        <div className="rounded-xl p-4 shadow-sm" style={{ backgroundColor: "#ffffff" }}>
-          <div className="text-2xl font-bold" style={{ color: "#2563eb" }}>
-            {stats.totalTime}
+        
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <div className="text-2xl font-bold" style={{ color: '#f59e0b' }}>
+            🏆 {statsData.excellentCount}
           </div>
-          <div className="text-sm" style={{ color: "#737373" }}>
-            Total Time
-          </div>
+          <div className="text-sm" style={{ color: '#737373' }}>Excellent</div>
         </div>
-        <div className="rounded-xl p-4 shadow-sm" style={{ backgroundColor: "#ffffff" }}>
-          <div className="text-2xl font-bold" style={{ color: "#581c87" }}>
-            🔥 {stats.currentStreak}
+        
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <div className="text-2xl font-bold" style={{ color: '#581c87' }}>
+            🔥 {statsData.currentStreak}
           </div>
-          <div className="text-sm" style={{ color: "#737373" }}>
-            Current Streak
-          </div>
+          <div className="text-sm" style={{ color: '#737373' }}>Current Streak</div>
         </div>
-        <div className="rounded-xl p-4 shadow-sm" style={{ backgroundColor: "#ffffff" }}>
-          <div className="text-2xl font-bold" style={{ color: "#f59e0b" }}>
-            🏆 {stats.bestStreak}
+        
+        <div className="bg-white rounded-xl p-4 shadow-sm">
+          <div className="flex items-center">
+            <div 
+              className="text-2xl font-bold"
+              style={{ 
+                color: statsData.improvementTrend >= 0 ? '#16a34a' : '#dc2626' 
+              }}
+            >
+              {statsData.improvementTrend >= 0 ? '📈' : '📉'} {Math.abs(statsData.improvementTrend)}%
+            </div>
           </div>
-          <div className="text-sm" style={{ color: "#737373" }}>
-            Best Streak
-          </div>
+          <div className="text-sm" style={{ color: '#737373' }}>Trend</div>
         </div>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Pie Chart - Topics Practiced */}
-        <div className="rounded-2xl p-6 shadow-sm" style={{ backgroundColor: "#ffffff" }}>
-          <h2 className="text-xl font-semibold mb-4" style={{ color: "#171717" }}>
-            Topics Practiced
-          </h2>
-          <div className="flex flex-col items-center">
-            <PieChart />
-            {/* Legend */}
-            <div className="mt-6 w-full space-y-2">
-              {topicData.map((item, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                    <span className="text-sm" style={{ color: "#171717" }}>
-                      {item.topic}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium" style={{ color: "#737373" }}>
-                      {item.count} tests
-                    </span>
-                    <span className="text-sm font-semibold" style={{ color: item.color }}>
-                      {item.percentage}%
-                    </span>
-                  </div>
-                </div>
+      {/* Filters and Search */}
+      <div className="bg-white rounded-xl p-6 shadow-sm">
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+          <div className="flex flex-wrap gap-3">
+            <select
+              value={selectedFilter}
+              onChange={(e) => setSelectedFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              {filterOptions.map(option => (
+                <option key={option.id} value={option.value}>
+                  {option.label}
+                </option>
               ))}
-            </div>
+            </select>
+            
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              {sortOptions.map(option => (
+                <option key={option.id} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="relative flex-1 max-w-md">
+            <input
+              type="text"
+              placeholder="Search tests..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+            <svg
+              className="absolute left-3 top-2.5 w-4 h-4 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
         </div>
-
-        {/* Performance Breakdown */}
-        <div className="lg:col-span-2 rounded-2xl p-6 shadow-sm" style={{ backgroundColor: "#ffffff" }}>
-          <h2 className="text-xl font-semibold mb-4" style={{ color: "#171717" }}>
-            Performance Breakdown
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Accuracy by Difficulty */}
-            <div className="p-4 rounded-xl" style={{ backgroundColor: "#f5f5f5" }}>
-              <h3 className="font-medium mb-3" style={{ color: "#171717" }}>
-                Accuracy by Difficulty
-              </h3>
-              <div className="space-y-3">
-                {[
-                  { level: "Easy", accuracy: 92, color: "#16a34a" },
-                  { level: "Medium", accuracy: 78, color: "#ea580c" },
-                  { level: "Hard", accuracy: 54, color: "#dc2626" },
-                ].map((item, index) => (
-                  <div key={index}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span style={{ color: "#171717" }}>{item.level}</span>
-                      <span style={{ color: item.color }}>{item.accuracy}%</span>
-                    </div>
-                    <div className="h-2 rounded-full" style={{ backgroundColor: "#e5e5e5" }}>
-                      <div
-                        className="h-full rounded-full transition-all"
-                        style={{ width: `${item.accuracy}%`, backgroundColor: item.color }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Time Analysis */}
-            <div className="p-4 rounded-xl" style={{ backgroundColor: "#f5f5f5" }}>
-              <h3 className="font-medium mb-3" style={{ color: "#171717" }}>
-                Time Analysis
-              </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm" style={{ color: "#737373" }}>
-                    Avg. Time per Test
-                  </span>
-                  <span className="font-semibold" style={{ color: "#171717" }}>
-                    28 min
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm" style={{ color: "#737373" }}>
-                    Fastest Completion
-                  </span>
-                  <span className="font-semibold" style={{ color: "#16a34a" }}>
-                    15 min
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm" style={{ color: "#737373" }}>
-                    Slowest Completion
-                  </span>
-                  <span className="font-semibold" style={{ color: "#dc2626" }}>
-                    45 min
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm" style={{ color: "#737373" }}>
-                    Avg. per Question
-                  </span>
-                  <span className="font-semibold" style={{ color: "#171717" }}>
-                    1.4 min
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Strengths */}
-            <div className="p-4 rounded-xl" style={{ backgroundColor: "#dcfce7" }}>
-              <h3 className="font-medium mb-3" style={{ color: "#16a34a" }}>
-                💪 Strengths
-              </h3>
-              <ul className="space-y-2 text-sm" style={{ color: "#171717" }}>
-                <li>• Contract Law (92% accuracy)</li>
-                <li>• Mathematics - Algebra (88%)</li>
-                <li>• Quick completion time</li>
-              </ul>
-            </div>
-
-            {/* Areas to Improve */}
-            <div className="p-4 rounded-xl" style={{ backgroundColor: "#fef3c7" }}>
-              <h3 className="font-medium mb-3" style={{ color: "#d97706" }}>
-                📈 Areas to Improve
-              </h3>
-              <ul className="space-y-2 text-sm" style={{ color: "#171717" }}>
-                <li>• Physics - Mechanics (55%)</li>
-                <li>• Biology - Cell Structure (62%)</li>
-                <li>• Hard difficulty questions</li>
-              </ul>
-            </div>
-          </div>
+        
+        <div className="mt-4 text-sm" style={{ color: '#737373' }}>
+          Showing {filteredTests.length} of {stats?.testHistory?.length || 0} tests
         </div>
       </div>
 
-      {/* Test Results Table */}
-      <div className="rounded-2xl p-6 shadow-sm" style={{ backgroundColor: "#ffffff" }}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold" style={{ color: "#171717" }}>
-            Recent Test Results
-          </h2>
-          <button className="text-sm font-medium" style={{ color: "#581c87" }}>
-            View All →
-          </button>
+      {/* Test History List */}
+      {filteredTests.length === 0 ? (
+        <div className="bg-white rounded-xl p-12 shadow-sm text-center">
+          <div className="text-4xl mb-4">🔍</div>
+          <h3 className="text-lg font-semibold mb-2" style={{ color: '#171717' }}>
+            No tests found
+          </h3>
+          <p className="text-sm" style={{ color: '#737373' }}>
+            Try adjusting your filters or search query
+          </p>
         </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b" style={{ borderColor: "#e5e5e5" }}>
-                <th className="text-left py-3 px-4 text-sm font-medium" style={{ color: "#737373" }}>
-                  Test Name
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium" style={{ color: "#737373" }}>
-                  Date
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium" style={{ color: "#737373" }}>
-                  Score
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium" style={{ color: "#737373" }}>
-                  Duration
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium" style={{ color: "#737373" }}>
-                  Status
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-medium" style={{ color: "#737373" }}>
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {testHistory.map((test) => (
-                <tr key={test.id} className="border-b hover:bg-gray-50 transition-colors" style={{ borderColor: "#f5f5f5" }}>
-                  <td className="py-4 px-4">
-                    <span className="font-medium" style={{ color: "#171717" }}>
-                      {test.title}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className="text-sm" style={{ color: "#737373" }}>
-                      {test.date}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-2 rounded-full" style={{ backgroundColor: "#e5e5e5" }}>
-                        <div
-                          className="h-full rounded-full"
-                          style={{
-                            width: `${test.score}%`,
-                            backgroundColor: test.score >= 70 ? "#16a34a" : test.score >= 50 ? "#ea580c" : "#dc2626",
-                          }}
-                        />
-                      </div>
-                      <span
-                        className="text-sm font-semibold"
-                        style={{ color: test.score >= 70 ? "#16a34a" : test.score >= 50 ? "#ea580c" : "#dc2626" }}
-                      >
-                        {test.score}%
-                      </span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className="text-sm" style={{ color: "#737373" }}>
-                      {test.duration}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span
-                      className="px-2 py-1 rounded-full text-xs font-medium"
-                      style={{
-                        backgroundColor: test.status === "passed" ? "#dcfce7" : "#fee2e2",
-                        color: test.status === "passed" ? "#16a34a" : "#dc2626",
+      ) : (
+        <div className="space-y-3">
+          {filteredTests.map((test, index) => {
+            const badge = getScoreBadge(test.score);
+            return (
+              <div
+                key={`${test.id}-${index}`}
+                className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div
+                      className="w-12 h-12 rounded-lg flex items-center justify-center text-xl font-bold"
+                      style={{ 
+                        backgroundColor: `${getScoreColor(test.score)}20`,
+                        color: getScoreColor(test.score)
                       }}
                     >
-                      {test.status === "passed" ? "Passed" : "Failed"}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <button
-                      className="text-sm font-medium px-3 py-1 rounded-lg transition-colors"
-                      style={{ color: "#581c87", backgroundColor: "#faf5ff" }}
+                      {getScoreIcon(test.score)}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-1">
+                        <h5 className="font-semibold text-lg" style={{ color: '#171717' }}>
+                          {test.title}
+                        </h5>
+                        <span
+                          className="px-2 py-1 rounded-full text-xs font-medium"
+                          style={{ 
+                            backgroundColor: badge.bg,
+                            color: badge.color
+                          }}
+                        >
+                          {badge.text}
+                        </span>
+                      </div>
+                      <p className="text-sm" style={{ color: '#737373' }}>
+                        Completed {formatDate(test.completedAt)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div
+                      className="text-3xl font-bold mb-1"
+                      style={{ color: getScoreColor(test.score) }}
                     >
-                      Review
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      {test.score}%
+                    </div>
+                    <div className="text-xs" style={{ color: '#737373' }}>
+                      Score
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
-      </div>
+      )}
+
+      {/* Performance Insights */}
+      {stats?.testHistory && stats.testHistory.length >= 5 && (
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6 border border-purple-100">
+          <h3 className="text-lg font-semibold mb-4" style={{ color: '#171717' }}>
+            📊 Performance Insights
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h4 className="font-medium mb-2" style={{ color: '#581c87' }}>
+                Recent Performance
+              </h4>
+              <p className="text-sm" style={{ color: '#737373' }}>
+                {statsData.improvementTrend > 0 
+                  ? `You've improved by ${statsData.improvementTrend}% in your last 5 tests! Keep it up! 🚀`
+                  : statsData.improvementTrend < 0
+                  ? `Your scores have dropped by ${Math.abs(statsData.improvementTrend)}% recently. Consider reviewing your study materials. 📚`
+                  : 'Your performance has been consistent. Great job maintaining your level! 👍'
+                }
+              </p>
+            </div>
+            <div>
+              <h4 className="font-medium mb-2" style={{ color: '#581c87' }}>
+                Achievement Status
+              </h4>
+              <p className="text-sm" style={{ color: '#737373' }}>
+                {statsData.excellentCount >= 5 
+                  ? `Outstanding! You've achieved excellence in ${statsData.excellentCount} tests! 🏆`
+                  : statsData.passRate >= 80
+                  ? `Great consistency with ${statsData.passRate}% pass rate! 🎯`
+                  : 'Focus on improving your pass rate for better results. 💪'
+                }
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

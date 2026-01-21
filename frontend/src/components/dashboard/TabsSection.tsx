@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useAtom } from "jotai";
 import { userAtom } from "../../store/authAtoms";
-import ProgressChart from "./ProgressChart";
+import { useUserStats } from "../../hooks/useUserStats";
+import TestHistory from "./TestHistory";
 
 interface Tab {
   id: string;
@@ -9,7 +10,7 @@ interface Tab {
 }
 
 const tabs: Tab[] = [
-  { id: "progress", label: "Progress" },
+  { id: "progress", label: "Test History" },
   { id: "attendance", label: "Attendance" },
   { id: "subscription", label: "Subscription" },
 ];
@@ -221,6 +222,7 @@ interface StreakCalendarProps {
 
 const StreakCalendar = ({ testCompletedDays = [] }: StreakCalendarProps) => {
   const [user] = useAtom(userAtom);
+  const { stats } = useUserStats();
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const hasData = testCompletedDays.length > 0;
@@ -268,27 +270,10 @@ const StreakCalendar = ({ testCompletedDays = [] }: StreakCalendarProps) => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   };
 
-  // Calculate current streak
-  const calculateStreak = () => {
-    const today = new Date();
-    let streak = 0;
-    const sortedDays = [...testCompletedDays].sort((a, b) => b.getTime() - a.getTime());
-    
-    for (let i = 0; i < sortedDays.length; i++) {
-      const dayDiff = Math.floor((today.getTime() - sortedDays[i].getTime()) / (1000 * 60 * 60 * 24));
-      if (dayDiff === streak || dayDiff === streak + 1) {
-        streak++;
-      } else {
-        break;
-      }
-    }
-    return streak;
-  };
-
-  const currentStreak = calculateStreak();
-  const testsThisMonth = testCompletedDays.filter(
-    d => d.getMonth() === new Date().getMonth() && d.getFullYear() === new Date().getFullYear()
-  ).length;
+  // Calculate current streak using real data
+  const currentStreak = stats?.streakCount || 0;
+  const bestStreak = stats?.bestStreak || 0;
+  const testsThisMonth = stats?.thisMonthAttendance || 0;
 
   // Empty state
   if (!hasData) {
@@ -343,7 +328,7 @@ const StreakCalendar = ({ testCompletedDays = [] }: StreakCalendarProps) => {
         </div>
         <div className="p-4 rounded-xl text-center" style={{ backgroundColor: '#f0fdf4' }}>
           <div className="text-3xl font-bold" style={{ color: '#16a34a' }}>
-            {Math.max(currentStreak, 5)}
+            {bestStreak}
           </div>
           <div className="text-sm mt-1" style={{ color: '#737373' }}>Best Streak</div>
         </div>
@@ -434,17 +419,16 @@ const StreakCalendar = ({ testCompletedDays = [] }: StreakCalendarProps) => {
 };
 
 const TabsSection = () => {
+  const { stats } = useUserStats();
   const [activeTab, setActiveTab] = useState("progress");
 
   const renderTabContent = () => {
-    // TODO: Replace with real data from backend
-    // For now, pass empty arrays to show "no data" states
-    const testScores: { label: string; value: number }[] = [];
-    const testCompletedDays: Date[] = [];
+    // Use real data from user stats
+    const testCompletedDays: Date[] = stats?.attendanceDays || [];
 
     switch (activeTab) {
       case "progress":
-        return <ProgressChart testScores={testScores} />;
+        return <TestHistory />;
       case "attendance":
         return <StreakCalendar testCompletedDays={testCompletedDays} />;
       case "subscription":

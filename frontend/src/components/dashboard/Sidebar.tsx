@@ -13,49 +13,49 @@ interface SidebarProps {
   onClose?: () => void;
 }
 
-const HomeIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const HomeIcon = ({ isActive }: { isActive?: boolean }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill={isActive ? "currentColor" : "none"} stroke="currentColor" strokeWidth={isActive ? "1.5" : "2"} strokeLinecap="round" strokeLinejoin="round">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
     <polyline points="9,22 9,12 15,12 15,22"/>
   </svg>
 );
 
-const ProfileIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const ProfileIcon = ({ isActive }: { isActive?: boolean }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill={isActive ? "currentColor" : "none"} stroke="currentColor" strokeWidth={isActive ? "1.5" : "2"} strokeLinecap="round" strokeLinejoin="round">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
     <circle cx="12" cy="7" r="4"/>
   </svg>
 );
 
-const QuizIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const QuizIcon = ({ isActive }: { isActive?: boolean }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? "2.5" : "2"} strokeLinecap="round" strokeLinejoin="round">
     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
   </svg>
 );
 
-const HistoryIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const HistoryIcon = ({ isActive }: { isActive?: boolean }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? "2.5" : "2"} strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="10"/>
     <polyline points="12,6 12,12 16,14"/>
   </svg>
 );
 
-const QuizListIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const QuizListIcon = ({ isActive }: { isActive?: boolean }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? "2.5" : "2"} strokeLinecap="round" strokeLinejoin="round">
     <path d="M9 11l3 3L22 4"/>
     <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
   </svg>
 );
 
-const FolderIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const FolderIcon = ({ isActive }: { isActive?: boolean }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill={isActive ? "currentColor" : "none"} stroke="currentColor" strokeWidth={isActive ? "1.5" : "2"} strokeLinecap="round" strokeLinejoin="round">
     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
   </svg>
 );
 
-const SettingsIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const SettingsIcon = ({ isActive }: { isActive?: boolean }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? "2.5" : "2"} strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="3"/>
     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
   </svg>
@@ -79,12 +79,12 @@ const Sidebar = ({ activeItem = "Home", onItemClick, isOpen = false, onClose }: 
   const [settingsExpanded, setSettingsExpanded] = useState(false);
 
   const navItems: NavItem[] = [
-    { icon: <HomeIcon />, label: "Home", id: "Home" },
-    { icon: <ProfileIcon />, label: "Profile", id: "Profile" },
-    { icon: <QuizIcon />, label: "Create Quiz", id: "CreateQuiz" },
-    { icon: <HistoryIcon />, label: "History", id: "History" },
-    { icon: <QuizListIcon />, label: "Quizzes", id: "Quizzes" },
-    { icon: <FolderIcon />, label: "Resources", id: "Resources" },
+    { icon: <HomeIcon isActive={activeItem === "Home"} />, label: "Home", id: "Home" },
+    { icon: <ProfileIcon isActive={activeItem === "Profile"} />, label: "Profile", id: "Profile" },
+    { icon: <QuizIcon isActive={activeItem === "CreateQuiz"} />, label: "Create Quiz", id: "CreateQuiz" },
+    { icon: <HistoryIcon isActive={activeItem === "History"} />, label: "History", id: "History" },
+    { icon: <QuizListIcon isActive={activeItem === "Quizzes"} />, label: "Quizzes", id: "Quizzes" },
+    { icon: <FolderIcon isActive={activeItem === "Resources"} />, label: "Resources", id: "Resources" },
   ];
 
   const settingsItems = [
@@ -170,7 +170,7 @@ const Sidebar = ({ activeItem = "Home", onItemClick, isOpen = false, onClose }: 
               style={{ color: '#737373' }}
             >
               <div className="flex items-center gap-3">
-                <SettingsIcon />
+                <SettingsIcon isActive={activeItem === "Theme" || activeItem === "Preference"} />
                 <span className="font-medium">Settings</span>
               </div>
               <ChevronIcon expanded={settingsExpanded} />

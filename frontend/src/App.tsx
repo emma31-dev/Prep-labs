@@ -52,7 +52,7 @@ function App() {
               <Route path="/auth/login" element={<Login />} />
               <Route path="/auth/signup" element={<Signup />} />
               <Route path="/auth/verify" element={<VerifyEmail />} />
-              <Route path="/dashboard" element={
+              <Route path="/dashboard/*" element={
                 <ProtectedRoute requireEmailVerification={false}>
                   <Dashboard />
                 </ProtectedRoute>
