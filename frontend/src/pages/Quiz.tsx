@@ -157,8 +157,8 @@ const Quiz = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: "#f8fafc" }}>
-        <div className="fixed -top-20 -left-20 w-[500px] h-[500px] rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#581c87" }} />
-        <div className="fixed -bottom-20 -right-20 w-[400px] h-[400px] rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#581c87" }} />
+        <div className="fixed -top-20 -left-20 w-125 h-125 rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#581c87" }} />
+        <div className="fixed -bottom-20 -right-20 w-100 h-100 rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#581c87" }} />
         <div className="text-center">
           <div
             className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4"
@@ -197,12 +197,12 @@ const Quiz = () => {
 
     return (
       <div className="min-h-screen flex items-center justify-center p-4 md:p-8 relative overflow-hidden" style={{ backgroundColor: "#f8fafc" }}>
-        <div className="fixed -top-20 -left-20 w-[500px] h-[500px] rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#581c87" }} />
-        <div className="fixed -bottom-20 -right-20 w-[400px] h-[400px] rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#581c87" }} />
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#a855f7" }} />
+        <div className="fixed -top-20 -left-20 w-125 h-125 rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#581c87" }} />
+        <div className="fixed -bottom-20 -right-20 w-100 h-100 rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#581c87" }} />
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-75 h-75 rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#a855f7" }} />
 
         <div
-          className="w-full max-w-2xl rounded-[32px] shadow-2xl p-8 text-center"
+          className="w-full max-w-2xl rounded-4xl shadow-2xl p-8 text-center"
           style={{
             background: "rgba(255, 255, 255, 0.7)",
             backdropFilter: "blur(12px)",
@@ -288,12 +288,12 @@ const Quiz = () => {
 
     return (
       <div className="min-h-screen flex items-center justify-center p-4 md:p-8 relative overflow-hidden" style={{ backgroundColor: "#f8fafc" }}>
-        <div className="fixed -top-20 -left-20 w-[500px] h-[500px] rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#581c87" }} />
-        <div className="fixed -bottom-20 -right-20 w-[400px] h-[400px] rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#581c87" }} />
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#a855f7" }} />
+        <div className="fixed -top-20 -left-20 w-125 h-125 rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#581c87" }} />
+        <div className="fixed -bottom-20 -right-20 w-100 h-125 rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#581c87" }} />
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-75 h-75 rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#a855f7" }} />
 
         <div
-          className="w-full max-w-4xl rounded-[32px] shadow-2xl overflow-hidden"
+          className="w-full max-w-4xl rounded-8 shadow-2xl overflow-hidden"
           style={{
             background: "rgba(255, 255, 255, 0.7)",
             backdropFilter: "blur(12px)",
@@ -516,13 +516,13 @@ const Quiz = () => {
   return (
     <div className="h-screen flex items-center justify-center p-0 lg:p-6 relative overflow-hidden" style={{ backgroundColor: "#f8fafc" }}>
       {/* Background Blobs */}
-      <div className="fixed -top-20 -left-20 w-[500px] h-[500px] rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#581c87" }} />
-      <div className="fixed -bottom-20 -right-20 w-[400px] h-[400px] rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#581c87" }} />
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#a855f7" }} />
+      <div className="fixed -top-20 -left-20 w-125 h-125 rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#581c87" }} />
+      <div className="fixed -bottom-20 -right-20 w-100 h-100 rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#581c87" }} />
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-75 h-75 rounded-full opacity-15 blur-[80px]" style={{ backgroundColor: "#a855f7" }} />
 
       {/* Main Glass Container */}
       <div
-        className="w-full h-full lg:max-w-6xl lg:h-auto lg:max-h-[calc(100vh-3rem)] lg:rounded-[32px] shadow-2xl flex flex-col overflow-hidden relative"
+        className="w-full h-full lg:max-w-6xl lg:h-auto lg:max-h-[calc(100vh-3rem)] lg:rounded-8 shadow-2xl flex flex-col overflow-hidden relative"
         style={{
           background: "rgba(255, 255, 255, 0.7)",
           backdropFilter: "blur(12px)",
